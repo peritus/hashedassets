@@ -23,6 +23,11 @@ setup(
       'MacFSEvents==0.2.1',
     ],
     zip_safe = False,
+    extras_require = dict(
+        test=[
+            'zope.testing',
+            ],
+        ),
     entry_points = {
         'console_scripts' : [
             'hashedassets = hashedassets:main',
