@@ -20,12 +20,14 @@ setup(
     include_package_data = True,
     install_requires=[
       'setuptools',
-      'MacFSEvents==0.2.1',
     ],
     zip_safe = False,
     extras_require = dict(
         test=[
             'zope.testing',
+            ],
+        fsevents=[
+            'MacFSEvents==0.2.1',
             ],
         ),
     entry_points = {
