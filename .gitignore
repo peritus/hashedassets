@@ -1,0 +1,6 @@
+.installed.cfg
+bin/buildout
+bin/hashedassets
+bin/test
+develop-eggs/hashedassets.egg-link
+src/hashedassets.egg-info/
