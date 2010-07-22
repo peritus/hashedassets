@@ -1,13 +1,12 @@
 #!/usr/bin/env
 
-import threading
-from os.path import getmtime, join
-from os import remove
-from shutil import copy
 from base64 import urlsafe_b64encode
-from fsevents import Observer, Stream, \
-    IN_MODIFY, IN_ATTRIB, IN_CREATE, \
-    IN_DELETE, IN_MOVED_FROM, IN_MOVED_TO
+from optparse import OptionParser
+from os import remove, mkdir, walk
+from os.path import getmtime, join, exists, isdir, relpath
+from shutil import copy
+from signal import signal, SIGTERM, SIGHUP
+from time import sleep
 
 try:
     # Python 2.5
@@ -16,29 +15,25 @@ except ImportError:
     # Python 2.4
     from sha import sha as sha1
 
-class AssetHasher(threading.Thread):
-
+class AssetHasher(object):
     hashfun = sha1
-    digestlength = 9999 # all letters
+    digestlength = 9999 # "don't truncate"
 
-    def __init__(self, input_dir, output_dir, pattern):
-        threading.Thread.__init__(self)
-
+    def __init__(self, input_dir, output_dir, map_filename=None):
         self._hash_map = {} # actually, a map for hashes
-
         self.input_dir = input_dir
         self.output_dir = output_dir
-        self.observer = Observer()
 
-        self.stream = Stream(self.file_event, input_dir, file_events=True)
-        self.observer.schedule(self.stream)
+        if not map_filename:
+            map_filename = join(self.output_dir, "hashedassets.map")
+
+        self.map_filename = map_filename
 
     @classmethod
     def digest(cls, content):
         return urlsafe_b64encode(cls.hashfun(content).digest()[:cls.digestlength]).strip("=")
 
-    def process_file(self, filename, moved=False):
-
+    def process_file(self, filename):
         if filename.find(".") == -1:
             extension = ""
         else:
@@ -62,32 +57,34 @@ class AssetHasher(threading.Thread):
         except KeyError: # file not under surveillance
             pass
 
-        self._hash_map[filename] = (hashed_filename, mtime)
+        self._hash_map[relpath(filename, self.input_dir)] = \
+            (relpath(hashed_filename, self.output_dir), mtime)
+
         copy(filename, hashed_filename)
         print "cp '%s' '%s'"  % (filename, hashed_filename)
 
-    def file_event(self, event):
-        if event.mask in (IN_MODIFY, IN_ATTRIB, IN_CREATE):
-            self.process_file(event.name)
-        if event.mask == IN_MOVED_FROM:
-            self.process_file(event.name, moved=True)
-        elif event.mask == IN_DELETE:
-            del self._hash_map[event.name]
+    def process_all_files(self):
+        for pos, dirs, files in walk(self.input_dir):
+            for file in files:
+                self.process_file(join(pos, file))
 
-    def stop(self):
-        self.observer.unschedule(self.stream)
-        self.observer.stop()
+    def read_map(self):
+        pass
+
+    def write_map(self):
+        with open(self.map_filename, "w") as file:
+            file.write("\n".join([
+                "%s: %s" % (filename, hashed_filename_mtime[0])
+                for filename, hashed_filename_mtime
+                in self._hash_map.iteritems()
+                ]) + "\n")
 
     def run(self):
-        print "Observing", self.input_dir
-        self.observer.start()
-        self.observer.join()
+        self.read_map()
+        self.process_all_files()
+        self.write_map()
 
 def main():
-    from optparse import OptionParser
-    from signal import signal, SIGTERM, SIGHUP
-    from time import sleep
-
     parser = OptionParser(usage="%prog -i DIR -o DIR")
     parser.add_option("-i", "--input-dir", dest="input_dir", type="string",
                   help="Where to look for input", metavar="DIR")
@@ -102,31 +99,19 @@ def main():
     if options.input_dir == None or options.output_dir == None:
         parser.error("-i and -o are required")
 
-    from os.path import isdir
-
     if not isdir(options.input_dir):
-        parser.error("Input dir at '%s' does not exists or is not a directory")
+        parser.error("Input dir at '%s' does not exists or is not a directory" % options.input_dir)
 
-    if not isdir(options.output_dir):
-        parser.error("Output dir at '%s' does not exists or is not a directory")
+    if not exists(options.output_dir):
+        mkdir(options.output_dir)
+        print "mkdir '%s'" % options.output_dir
+    elif not isdir(options.output_dir):
+        parser.error("Output dir at '%s' is not a directory" % options.output_dir)
 
-    ah = AssetHasher(
-            input_dir=options.input_dir,
-            output_dir=options.output_dir,
-            pattern=[]
-    )
-
-    ah.start()
-
-    signal(SIGTERM, ah.stop)
-    signal(SIGHUP, ah.stop)
-
-    try:
-        while True:
-            sleep(1000)
-    except KeyboardInterrupt:
-        print "Shut down"
-        ah.stop()
+    AssetHasher(
+      input_dir=options.input_dir,
+      output_dir=options.output_dir,
+    ).run()
 
 if __name__ == '__main__':
     main()
