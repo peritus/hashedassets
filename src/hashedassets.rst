@@ -19,17 +19,53 @@ Preparations
 ...             sys.stdout.write(out)
 ...             sys.stdout.flush()
 
+First, we create a file to be hashed:
 
 >>> system("mkdir input/")
 >>> with open("input/foo.txt", "w") as file:
 ...     file.write("foo")
->>> system("hashedassets -i input -o output")
+
+>>> def create_hash_map(format):
+...     system("hashedassets -i input -o output -m output/map.%s" % format)
+...     print open("output/map.%s" % format).read()
+
+>>> create_hash_map('txt')
 mkdir 'output'
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
+<BLANKLINE>
 
 >>> system("ls output/")
 C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
-hashedassets.map
+map.txt
 
->>> open("output/hashedassets.map").read()
-'foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt\n'
+We can easily do this with multiple formats:
+
+>>> create_hash_map("js")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+var hashedassets = {"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"};
+
+>>> create_hash_map("json")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+{"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"}
+
+>>> create_hash_map("jsonp")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+hashedassets({"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"});
+
+>>> create_hash_map("scss")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+@mixin hashedassets($directive, $path) {
+    @if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
+    @else {
+      @warn "Did not find "#{$path}" in list of assets";
+      #{$directive}: url($path);
+    }
+}
+
+>>> create_hash_map("php")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+$hashedassets = array(
+  "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
+)
+
