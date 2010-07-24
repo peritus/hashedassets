@@ -26,7 +26,7 @@ First, we create a file to be hashed:
 ...     file.write("foo")
 
 >>> def create_hash_map(format):
-...     system("hashedassets -i input -o output -m output/map.%s" % format)
+...     system("hashedassets -m output/map.%s input/*.txt output/" % format)
 ...     print open("output/map.%s" % format).read()
 
 >>> create_hash_map('txt')
@@ -56,7 +56,7 @@ hashedassets({"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"});
 >>> create_hash_map("scss")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 @mixin hashedassets($directive, $path) {
-    @if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
+         @if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
     @else {
       @warn "Did not find "#{$path}" in list of assets";
       #{$directive}: url($path);
@@ -68,4 +68,12 @@ cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 $hashedassets = array(
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
 )
+
+
+However, if we run this with no arguments, it fails:
+
+>>> system("hashedassets")
+Usage: hashedassets [ -m MAPFILE ] SOURCE [...] DEST
+<BLANKLINE>
+hashedassets: error: You need to specify at least one file and a destination directory
 

@@ -1,12 +1,16 @@
 #!/usr/bin/env
 
 from base64 import urlsafe_b64encode
+from glob import glob
 from optparse import OptionParser
 from os import remove, mkdir, walk
-from os.path import getmtime, join, exists, isdir, relpath, splitext
+from os.path import getmtime, join, exists, isdir, relpath,\
+                    splitext, normpath, dirname, commonprefix
 from shutil import copy
 from signal import signal, SIGTERM, SIGHUP
+from sys import exit
 from time import sleep
+from itertools import chain
 
 try:
     # Python 2.5
@@ -46,7 +50,7 @@ if loads and dumps:
 class SassSerializer(object):
     PREAMBLE = (
     '@mixin hashedassets($directive, $path) {\n'
-    '    @'
+    '         @'
     )
 
     ENTRY = (
@@ -86,13 +90,15 @@ class AssetHasher(object):
     hashfun = sha1
     digestlength = 9999 # "don't truncate"
 
-    def __init__(self, input_dir, output_dir, map_filename=None):
+    def __init__(self, files, output_dir, map_filename=None):
         self._hash_map = {} # actually, a map for hashes
-        self.input_dir = input_dir
         self.output_dir = output_dir
 
         if not map_filename:
-            map_filename = join(self.output_dir, "hashedassets.map")
+            map_filename = join(self.output_dir, "hashedassets.txt")
+
+        self.files = chain.from_iterable([glob(path) for path in files])
+        self.input_dir = dirname(commonprefix(files))
 
 
         self.map_filename = map_filename
@@ -129,9 +135,8 @@ class AssetHasher(object):
         print "cp '%s' '%s'"  % (filename, hashed_filename)
 
     def process_all_files(self):
-        for pos, dirs, files in walk(self.input_dir):
-            for file in files:
-                self.process_file(join(pos, file))
+        for file in self.files:
+            self.process_file(file)
 
     def read_map(self):
         pass
@@ -152,34 +157,27 @@ class AssetHasher(object):
         self.write_map()
 
 def main():
-    parser = OptionParser(usage="%prog -i DIR -o DIR -m MAPFILE")
-    parser.add_option("-i", "--input-dir", dest="input_dir", type="string",
-                  help="Where to look for input", metavar="DIR")
-    parser.add_option("-o", "--output-dir", dest="output_dir", type="string",
-                  help="Where to write", metavar="DIR")
+    parser = OptionParser(usage="%prog [ -m MAPFILE ] SOURCE [...] DEST")
     parser.add_option("-m", "--map-file", dest="map_filename", type="string",
                   help="Write from-to-map", metavar="MAPFILE")
 
     (options, args) = parser.parse_args()
 
-    if len(args) == 2:
-        (options.input_dir, options.output_dir) = args
+    if len(args) < 2:
+        parser.error("You need to specify at least one file and a destination directory")
 
-    if options.input_dir == None or options.output_dir == None:
-        parser.error("-i and -o are required")
+    output_dir = normpath(args[-1])
+    files = args[:-1]
 
-    if not isdir(options.input_dir):
-        parser.error("Input dir at '%s' does not exists or is not a directory" % options.input_dir)
-
-    if not exists(options.output_dir):
-        mkdir(options.output_dir)
-        print "mkdir '%s'" % options.output_dir
-    elif not isdir(options.output_dir):
-        parser.error("Output dir at '%s' is not a directory" % options.output_dir)
+    if not exists(output_dir):
+        mkdir(output_dir)
+        print "mkdir '%s'" % output_dir
+    elif not isdir(output_dir):
+        parser.error("Output dir at '%s' is not a directory" % output_dir)
 
     AssetHasher(
-      input_dir=options.input_dir,
-      output_dir=options.output_dir,
+      files=files,
+      output_dir=output_dir,
       map_filename=options.map_filename,
     ).run()
 
