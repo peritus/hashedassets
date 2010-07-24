@@ -25,12 +25,20 @@ First, we create a file to be hashed:
 >>> with open("input/foo.txt", "w") as file:
 ...     file.write("foo")
 
->>> def create_hash_map(format):
-...     system("hashedassets -m output/map.%s input/*.txt output/" % format)
-...     print open("output/map.%s" % format).read()
+>>> def create_hash_map(ext=None):
+...     if ext:
+...         system("hashedassets -m output/map.%s input/*.txt output/" % ext)
+...     else:
+...         system("hashedassets input/*.txt output/")
+...
+...     if ext:
+...         print open("output/map.%s" % ext).read()
+
+>>> create_hash_map()
+mkdir 'output'
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 
 >>> create_hash_map('txt')
-mkdir 'output'
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 <BLANKLINE>

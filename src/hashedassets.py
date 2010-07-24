@@ -92,16 +92,12 @@ class AssetHasher(object):
 
     def __init__(self, files, output_dir, map_filename=None):
         self._hash_map = {} # actually, a map for hashes
+
         self.output_dir = output_dir
-
-        if not map_filename:
-            map_filename = join(self.output_dir, "hashedassets.txt")
-
+        self.map_filename = map_filename
         self.files = chain.from_iterable([glob(path) for path in files])
         self.input_dir = dirname(commonprefix(files))
 
-
-        self.map_filename = map_filename
 
     @classmethod
     def digest(cls, content):
@@ -142,6 +138,9 @@ class AssetHasher(object):
         pass
 
     def write_map(self):
+        if not self.map_filename:
+            return
+
         _, map_ext = splitext(self.map_filename)
         serialize, _ = SERIALIZERS[map_ext]
         with open(self.map_filename, "w") as file:
