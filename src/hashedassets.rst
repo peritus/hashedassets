@@ -77,16 +77,20 @@ $my_callback = array(
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
 )
 
+The type of the map is guessed from the filename, but you can specify it as well:
+
+>>> system("hashedassets -m cantguessmaptype -t js input/* output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 
 However, if we run this with no arguments, it fails:
 
 >>> system("hashedassets")
-Usage: hashedassets [ -m MAPFILE [-n MAPNAME]] SOURCE [...] DEST
+Usage: hashedassets [ -m MAPFILE [-t MAPTYPE] [-n MAPNAME]] SOURCE [...] DEST
 <BLANKLINE>
 hashedassets: error: You need to specify at least one file and a destination directory
 
 >>> system("hashedassets -n doesnotmakesense input/*.txt output/")
-Usage: hashedassets [ -m MAPFILE [-n MAPNAME]] SOURCE [...] DEST
+Usage: hashedassets [ -m MAPFILE [-t MAPTYPE] [-n MAPNAME]] SOURCE [...] DEST
 <BLANKLINE>
 hashedassets: error: -n without -m does not make sense. Use -m to specify a map filename
 

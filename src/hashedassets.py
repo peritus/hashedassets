@@ -26,7 +26,7 @@ class SimpleSerializer(object):
     def serialize(cls, items, _):
         return "\n".join(["%s: %s" % item for item in items.iteritems()]) + "\n"
 
-SERIALIZERS['.txt'] = SimpleSerializer
+SERIALIZERS['txt'] = SimpleSerializer
 
 try:
     from json import loads, dumps
@@ -42,14 +42,14 @@ if loads and dumps:
         def serialize(cls, items, _):
             return dumps(items)
 
-    SERIALIZERS['.json'] = JSONSerializer
+    SERIALIZERS['json'] = JSONSerializer
 
     class JavaScriptSerializer(object):
         @classmethod
         def serialize(cls, items, map_name):
             return ("var %s = " % map_name) + dumps(items) + ";"
 
-    SERIALIZERS['.js'] = JavaScriptSerializer
+    SERIALIZERS['js'] = JavaScriptSerializer
 
     class JSONPSerializer(object):
         @classmethod
@@ -59,7 +59,7 @@ if loads and dumps:
                     'dump': dumps(items)
                     }
 
-    SERIALIZERS['.jsonp'] = JSONPSerializer
+    SERIALIZERS['jsonp'] = JSONPSerializer
 
 class SassSerializer(object):
     PREAMBLE = (
@@ -91,28 +91,31 @@ class SassSerializer(object):
             cls.EPILOQUE
             )
 
-SERIALIZERS['.scss'] = SassSerializer
+SERIALIZERS['scss'] = SassSerializer
 
 class PHPSerializer(SassSerializer):
     PREAMBLE = '$%s = array(\n'
     ENTRY = '  "%s" => "%s",\n'
     EPILOQUE = ')'
 
-SERIALIZERS['.php'] = PHPSerializer
+SERIALIZERS['php'] = PHPSerializer
 
 class AssetHasher(object):
     hashfun = sha1
     digestlength = 9999 # "don't truncate"
 
-    def __init__(self, files, output_dir, map_filename, map_name):
+    def __init__(self, files, output_dir, map_filename, map_name, map_type):
         self._hash_map = {} # actually, a map for hashes
+
+        if not map_type and map_filename:
+            map_type = splitext(map_filename)[1].lstrip(".")
 
         self.output_dir = output_dir
         self.map_filename = map_filename
         self.map_name = map_name
+        self.map_type = map_type
         self.files = chain.from_iterable([glob(path) for path in files])
         self.input_dir = dirname(commonprefix(files))
-
 
     @classmethod
     def digest(cls, content):
@@ -156,13 +159,13 @@ class AssetHasher(object):
         if not self.map_filename:
             return
 
-        _, map_ext = splitext(self.map_filename)
         items = dict(
                   (filename, hashed_filename_mtime[0])
                   for filename, hashed_filename_mtime
                   in self._hash_map.iteritems()
                 )
-        serialized = SERIALIZERS[map_ext].serialize(items, self.map_name)
+
+        serialized = SERIALIZERS[self.map_type].serialize(items, self.map_name)
 
         with open(self.map_filename, "w") as file:
             file.write(serialized)
@@ -173,12 +176,18 @@ class AssetHasher(object):
         self.write_map()
 
 def main():
-    parser = OptionParser(usage="%prog [ -m MAPFILE [-n MAPNAME]] SOURCE [...] DEST")
+    parser = OptionParser(usage=
+            "%prog [ -m MAPFILE [-t MAPTYPE] [-n MAPNAME]] SOURCE [...] DEST")
     parser.add_option("-m", "--map-file", dest="map_filename", type="string",
                   help="Write from-to-map", metavar="MAPFILE")
     parser.add_option("-n", "--map-name", dest="map_name", type="string",
-                  help="Name of the map", metavar="MAPNAME",
+                  help="Name of the map [default: %default]", metavar="MAPNAME",
                   default="hashedassets")
+    parser.add_option("-t", "--map-type", dest="map_type", type="choice",
+                  help="One of " +
+                       ", ".join(SERIALIZERS.keys()) +
+                       " [default: guessed from MAPFILE]", metavar="MAPTYPE",
+                  choices=SERIALIZERS.keys())
 
     (options, args) = parser.parse_args()
 
@@ -204,6 +213,7 @@ def main():
       output_dir=output_dir,
       map_filename=options.map_filename,
       map_name=options.map_name,
+      map_type=options.map_type,
     ).run()
 
 if __name__ == '__main__':
