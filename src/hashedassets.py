@@ -21,10 +21,12 @@ except ImportError:
 
 SERIALIZERS = {}
 
-def _simple_serialize(map):
-    return "\n".join(["%s: %s" % item for item in map.iteritems()]) + "\n"
+class SimpleSerializer(object):
+    @classmethod
+    def serialize(cls, items, _):
+        return "\n".join(["%s: %s" % item for item in items.iteritems()]) + "\n"
 
-SERIALIZERS['.txt'] = (_simple_serialize, None)
+SERIALIZERS['.txt'] = SimpleSerializer
 
 try:
     from json import loads, dumps
@@ -35,21 +37,33 @@ except ImportError:
         loads, dumps = (None, None)
 
 if loads and dumps:
-    SERIALIZERS['.json'] = (dumps, loads)
+    class JSONSerializer(object):
+        @classmethod
+        def serialize(cls, items, _):
+            return dumps(items)
 
-    SERIALIZERS['.js'] = (
-            lambda s: "var hashedassets = " + dumps(s) + ";",
-            lambda s: s[s.find("=")+1:],
-            )
+    SERIALIZERS['.json'] = JSONSerializer
 
-    SERIALIZERS['.jsonp'] = (
-            lambda s: "hashedassets(" + dumps(s) + ");",
-            lambda s: s[s.find("(")+1:s.rfind(")")],
-            )
+    class JavaScriptSerializer(object):
+        @classmethod
+        def serialize(cls, items, map_name):
+            return ("var %s = " % map_name) + dumps(items) + ";"
+
+    SERIALIZERS['.js'] = JavaScriptSerializer
+
+    class JSONPSerializer(object):
+        @classmethod
+        def serialize(cls, items, map_name):
+            return "%(map_name)s(%(dump)s);" % {
+                    'map_name': map_name,
+                    'dump': dumps(items)
+                    }
+
+    SERIALIZERS['.jsonp'] = JSONPSerializer
 
 class SassSerializer(object):
     PREAMBLE = (
-    '@mixin hashedassets($directive, $path) {\n'
+    '@mixin %s($directive, $path) {\n'
     '         @'
     )
 
@@ -67,9 +81,9 @@ class SassSerializer(object):
     )
 
     @classmethod
-    def serialize(cls, items):
+    def serialize(cls, items, map_name):
         return (
-            cls.PREAMBLE + "".join([
+            (cls.PREAMBLE % map_name) + "".join([
                 cls.ENTRY % item
                 for item
                 in items.iteritems()
@@ -77,24 +91,25 @@ class SassSerializer(object):
             cls.EPILOQUE
             )
 
-SERIALIZERS['.scss'] = (SassSerializer.serialize, None)
+SERIALIZERS['.scss'] = SassSerializer
 
 class PHPSerializer(SassSerializer):
-    PREAMBLE = '$hashedassets = array(\n'
+    PREAMBLE = '$%s = array(\n'
     ENTRY = '  "%s" => "%s",\n'
     EPILOQUE = ')'
 
-SERIALIZERS['.php'] = (PHPSerializer.serialize, None)
+SERIALIZERS['.php'] = PHPSerializer
 
 class AssetHasher(object):
     hashfun = sha1
     digestlength = 9999 # "don't truncate"
 
-    def __init__(self, files, output_dir, map_filename=None):
+    def __init__(self, files, output_dir, map_filename, map_name):
         self._hash_map = {} # actually, a map for hashes
 
         self.output_dir = output_dir
         self.map_filename = map_filename
+        self.map_name = map_name
         self.files = chain.from_iterable([glob(path) for path in files])
         self.input_dir = dirname(commonprefix(files))
 
@@ -142,13 +157,15 @@ class AssetHasher(object):
             return
 
         _, map_ext = splitext(self.map_filename)
-        serialize, _ = SERIALIZERS[map_ext]
+        items = dict(
+                  (filename, hashed_filename_mtime[0])
+                  for filename, hashed_filename_mtime
+                  in self._hash_map.iteritems()
+                )
+        serialized = SERIALIZERS[map_ext].serialize(items, self.map_name)
+
         with open(self.map_filename, "w") as file:
-            file.write(serialize(dict(
-                (filename, hashed_filename_mtime[0])
-                for filename, hashed_filename_mtime
-                in self._hash_map.iteritems()
-            )))
+            file.write(serialized)
 
     def run(self):
         self.read_map()
@@ -156,14 +173,22 @@ class AssetHasher(object):
         self.write_map()
 
 def main():
-    parser = OptionParser(usage="%prog [ -m MAPFILE ] SOURCE [...] DEST")
+    parser = OptionParser(usage="%prog [ -m MAPFILE [-n MAPNAME]] SOURCE [...] DEST")
     parser.add_option("-m", "--map-file", dest="map_filename", type="string",
                   help="Write from-to-map", metavar="MAPFILE")
+    parser.add_option("-n", "--map-name", dest="map_name", type="string",
+                  help="Name of the map", metavar="MAPNAME",
+                  default="hashedassets")
 
     (options, args) = parser.parse_args()
 
     if len(args) < 2:
         parser.error("You need to specify at least one file and a destination directory")
+
+    if options.map_name and \
+        parser.defaults['map_name'] != options.map_name and\
+        not options.map_filename:
+        parser.error("-n without -m does not make sense. Use -m to specify a map filename")
 
     output_dir = normpath(args[-1])
     files = args[:-1]
@@ -178,6 +203,7 @@ def main():
       files=files,
       output_dir=output_dir,
       map_filename=options.map_filename,
+      map_name=options.map_name,
     ).run()
 
 if __name__ == '__main__':

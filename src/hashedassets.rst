@@ -27,7 +27,7 @@ First, we create a file to be hashed:
 
 >>> def create_hash_map(ext=None):
 ...     if ext:
-...         system("hashedassets -m output/map.%s input/*.txt output/" % ext)
+...         system("hashedassets -m output/map.%s -n my_callback input/*.txt output/" % ext)
 ...     else:
 ...         system("hashedassets input/*.txt output/")
 ...
@@ -51,7 +51,7 @@ We can easily do this with multiple formats:
 
 >>> create_hash_map("js")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-var hashedassets = {"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"};
+var my_callback = {"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"};
 
 >>> create_hash_map("json")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -59,11 +59,11 @@ cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 
 >>> create_hash_map("jsonp")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-hashedassets({"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"});
+my_callback({"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"});
 
 >>> create_hash_map("scss")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-@mixin hashedassets($directive, $path) {
+@mixin my_callback($directive, $path) {
          @if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
     @else {
       @warn "Did not find "#{$path}" in list of assets";
@@ -73,7 +73,7 @@ cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 
 >>> create_hash_map("php")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-$hashedassets = array(
+$my_callback = array(
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
 )
 
@@ -81,7 +81,12 @@ $hashedassets = array(
 However, if we run this with no arguments, it fails:
 
 >>> system("hashedassets")
-Usage: hashedassets [ -m MAPFILE ] SOURCE [...] DEST
+Usage: hashedassets [ -m MAPFILE [-n MAPNAME]] SOURCE [...] DEST
 <BLANKLINE>
 hashedassets: error: You need to specify at least one file and a destination directory
+
+>>> system("hashedassets -n doesnotmakesense input/*.txt output/")
+Usage: hashedassets [ -m MAPFILE [-n MAPNAME]] SOURCE [...] DEST
+<BLANKLINE>
+hashedassets: error: -n without -m does not make sense. Use -m to specify a map filename
 
