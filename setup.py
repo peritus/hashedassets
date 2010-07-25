@@ -25,6 +25,8 @@ setup(
     extras_require = dict(
         test=[
             'zope.testing',
+            'python-subunit==0.0.6',
+            'junitxml==0.5',
             ],
         fsevents=[
             'MacFSEvents==0.2.1',
