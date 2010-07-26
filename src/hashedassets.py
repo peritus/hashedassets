@@ -109,7 +109,11 @@ class SedSerializer(object):
     ENTRY = 's/%s/%s/g'
     @classmethod
     def serialize(cls, items, map_name):
-        return "\n".join([ cls.ENTRY % item for item in items.iteritems() ])
+        return "\n".join([
+            (cls.ENTRY % item).replace('.', '\\.')
+            for item
+            in items.iteritems()
+            ])
 
 SERIALIZERS['sed'] = SedSerializer
 

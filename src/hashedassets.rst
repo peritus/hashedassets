@@ -80,15 +80,25 @@ $my_callback = array(
 We can also generate a sed script that does the replacements for us:
 >>> create_hash_map("sed")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-s/foo.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt/g
+s/foo\.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM\.txt/g
 
 We should also be able to use this directly with sed
 
 >>> with open("replaceme.html", "w") as file:
 ...     file.write('<a href=foo.txt>bar</a>')
 
+The script is then applied like this:
+
 >>> system("sed -f output/map.sed replaceme.html")
 <a href=C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt>bar</a>
+
+However, '.' is not treated as wildcard, so the following does not work
+
+>>> with open("replaceme2.html", "w") as file:
+...     file.write('<a href=fooAtxt>bar</a>')
+
+>>> system("sed -f output/map.sed replaceme2.html")
+<a href=fooAtxt>bar</a>
 
 The type of the map is guessed from the filename, but you can specify it as well:
 
