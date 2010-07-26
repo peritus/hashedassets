@@ -77,6 +77,19 @@ $my_callback = array(
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
 )
 
+We can also generate a sed script that does the replacements for us:
+>>> create_hash_map("sed")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+s/foo.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt/g
+
+We should also be able to use this directly with sed
+
+>>> with open("replaceme.html", "w") as file:
+...     file.write('<a href=foo.txt>bar</a>')
+
+>>> system("sed -f output/map.sed replaceme.html")
+<a href=C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt>bar</a>
+
 The type of the map is guessed from the filename, but you can specify it as well:
 
 >>> system("hashedassets -m cantguessmaptype -t js input/* output/")

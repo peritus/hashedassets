@@ -100,6 +100,19 @@ class PHPSerializer(SassSerializer):
 
 SERIALIZERS['php'] = PHPSerializer
 
+class SedSerializer(object):
+    '''
+    Writes a sed script, use like this:
+
+    sed -f map.sed FILE_NEEDING_REPLACEMENTS
+    '''
+    ENTRY = 's/%s/%s/g'
+    @classmethod
+    def serialize(cls, items, map_name):
+        return "\n".join([ cls.ENTRY % item for item in items.iteritems() ])
+
+SERIALIZERS['sed'] = SedSerializer
+
 class AssetHasher(object):
     hashfun = sha1
     digestlength = 9999 # "don't truncate"
