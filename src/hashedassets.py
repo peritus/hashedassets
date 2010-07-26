@@ -107,13 +107,19 @@ class SedSerializer(object):
     sed -f map.sed FILE_NEEDING_REPLACEMENTS
     '''
     ENTRY = 's/%s/%s/g'
+
+    @classmethod
+    def _escape_filename(cls, filename):
+        return filename.replace('/', '\\/').replace('.', '\\.')
+
     @classmethod
     def serialize(cls, items, map_name):
         return "\n".join([
-            (cls.ENTRY % item).replace('.', '\\.')
-            for item
+            (cls.ENTRY % (cls._escape_filename(key),
+                cls._escape_filename(value)))
+            for key, value
             in items.iteritems()
-            ])
+            ]) + '\n'
 
 SERIALIZERS['sed'] = SedSerializer
 
