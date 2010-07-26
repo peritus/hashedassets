@@ -40,14 +40,14 @@ if loads and dumps:
     class JSONSerializer(object):
         @classmethod
         def serialize(cls, items, _):
-            return dumps(items)
+            return dumps(items, sort_keys=True, indent=2)
 
     SERIALIZERS['json'] = JSONSerializer
 
     class JavaScriptSerializer(object):
         @classmethod
         def serialize(cls, items, map_name):
-            return ("var %s = " % map_name) + dumps(items) + ";"
+            return ("var %s = " % map_name) + dumps(items, sort_keys=True, indent=2) + ";"
 
     SERIALIZERS['js'] = JavaScriptSerializer
 
@@ -56,7 +56,7 @@ if loads and dumps:
         def serialize(cls, items, map_name):
             return "%(map_name)s(%(dump)s);" % {
                     'map_name': map_name,
-                    'dump': dumps(items)
+                    'dump': dumps(items, sort_keys=True, indent=2)
                     }
 
     SERIALIZERS['jsonp'] = JSONPSerializer

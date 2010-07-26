@@ -51,15 +51,22 @@ We can easily do this with multiple formats:
 
 >>> create_hash_map("js")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-var my_callback = {"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"};
+var my_callback = {
+  "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"
+};
 
 >>> create_hash_map("json")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-{"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"}
+{
+  "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"
+}
+
 
 >>> create_hash_map("jsonp")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-my_callback({"foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"});
+my_callback({
+  "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"
+});
 
 >>> create_hash_map("scss")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
