@@ -61,7 +61,19 @@ if loads and dumps:
 
     SERIALIZERS['jsonp'] = JSONPSerializer
 
-class SassSerializer(object):
+class PreambleEntryEpiloqueSerializer(object):
+    @classmethod
+    def serialize(cls, items, map_name):
+        return (
+            (cls.PREAMBLE % map_name) + "".join([
+                cls.ENTRY % item
+                for item
+                in items.iteritems()
+                ]) +
+            cls.EPILOQUE
+            )
+
+class SassSerializer(PreambleEntryEpiloqueSerializer):
     PREAMBLE = (
     '@mixin %s($directive, $path) {\n'
     '         @'
@@ -80,20 +92,10 @@ class SassSerializer(object):
     '}'
     )
 
-    @classmethod
-    def serialize(cls, items, map_name):
-        return (
-            (cls.PREAMBLE % map_name) + "".join([
-                cls.ENTRY % item
-                for item
-                in items.iteritems()
-                ]) +
-            cls.EPILOQUE
-            )
 
 SERIALIZERS['scss'] = SassSerializer
 
-class PHPSerializer(SassSerializer):
+class PHPSerializer(PreambleEntryEpiloqueSerializer):
     PREAMBLE = '$%s = array(\n'
     ENTRY = '  "%s" => "%s",\n'
     EPILOQUE = ')'
