@@ -1,3 +1,6 @@
+hashedassets
+============
+
 Preparations
 ------------
 
@@ -19,6 +22,9 @@ Preparations
 ...             sys.stdout.write(out)
 ...             sys.stdout.flush()
 
+Creating some source files
+--------------------------
+
 First, we create a file to be hashed:
 
 >>> system("mkdir input/")
@@ -39,6 +45,9 @@ First, we create a file to be hashed:
 ...
 ...     if ext:
 ...         print open("output/map.%s" % ext).read()
+
+Simple usage
+------------
 
 >>> create_hash_map()
 mkdir 'output'
@@ -67,6 +76,9 @@ Modification time is also preserved:
 
 We can easily do this with multiple formats:
 
+JavaScript
+++++++++++
+
 >>> create_hash_map("js")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
@@ -74,6 +86,9 @@ var my_callback = {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
 };
+
+JSON
+++++
 
 >>> create_hash_map("json")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -83,6 +98,8 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
 }
 
+JSONP
++++++
 
 >>> create_hash_map("jsonp")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -91,6 +108,11 @@ my_callback({
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
 });
+
+Sass
+++++
+
+`Sass <http://sass-lang.com/>`_  is a meta language on top of CSS.
 
 >>> create_hash_map("scss")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -104,6 +126,9 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
     }
 }
 
+PHP
++++
+
 >>> create_hash_map("php")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
@@ -112,7 +137,11 @@ $my_callback = array(
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
 )
 
+Sed
++++
+
 We can also generate a sed script that does the replacements for us:
+
 >>> create_hash_map("sed")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
@@ -138,11 +167,17 @@ However, '.' is not treated as wildcard, so the following does not work
 >>> system("sed -f output/map.sed replaceme2.html")
 <a href=fooAtxt>bar</a>
 
+Specifying the type via -t
+++++++++++++++++++++++++++
+
 The type of the map is guessed from the filename, but you can specify it as well:
 
 >>> system("hashedassets -m cantguessmaptype -t js input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+Error handling
+--------------
 
 However, if we run this with no arguments, it fails:
 
