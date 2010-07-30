@@ -3,7 +3,7 @@
 from base64 import urlsafe_b64encode
 from glob import glob
 from optparse import OptionParser
-from os import remove, mkdir, walk
+from os import remove, mkdir, walk, stat
 from os.path import getmtime, join, exists, isdir, relpath,\
                     splitext, normpath, dirname, commonprefix
 from shutil import copy2
@@ -41,6 +41,10 @@ if loads and dumps:
         @classmethod
         def serialize(cls, items, _):
             return dumps(items, sort_keys=True, indent=2)
+
+        @classmethod
+        def deserialize(cls, string):
+            return loads(string)
 
     SERIALIZERS['json'] = JSONSerializer
 
@@ -167,9 +171,14 @@ class AssetHasher(object):
         except KeyError: # file not under surveillance
             pass
 
-        self._hash_map[relpath(filename, self.input_dir)] = \
-            (relpath(hashed_filename, self.output_dir), mtime)
+        map_key = relpath(filename, self.input_dir)
 
+        # no work to do
+        if map_key in self._hash_map:
+            return
+
+        # actually copy the file
+        self._hash_map[map_key] = (relpath(hashed_filename, self.output_dir), mtime)
         copy2(filename, hashed_filename)
         print "cp '%s' '%s'"  % (filename, hashed_filename)
 
@@ -178,7 +187,21 @@ class AssetHasher(object):
             self.process_file(file)
 
     def read_map(self):
-        pass
+        if not self.map_filename:
+            return
+
+        if not exists(self.map_filename):
+            return
+
+        content = open(self.map_filename).read()
+
+        deserialized = SERIALIZERS[self.map_type].deserialize(content)
+
+        self._hash_map = dict(
+            (filename, (hashed_filename, stat(join(self.output_dir, hashed_filename)).st_mtime))
+            for filename, hashed_filename
+            in deserialized.iteritems()
+        )
 
     def write_map(self):
         if not self.map_filename:

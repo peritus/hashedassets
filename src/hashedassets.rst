@@ -160,6 +160,14 @@ The type of the map is guessed from the filename, but you can specify it as well
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
+Re-using a map
+++++++++++++++
+
+The program reads in maps it created in a prior run to only copy files that
+haven't changed since. So, the following command does not copy any files:
+
+>>> system("hashedassets -m output/map.json -n my_callback input/*.txt input/*/*.txt output/")
+
 Error handling
 --------------
 
