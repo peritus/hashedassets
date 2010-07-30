@@ -3,11 +3,12 @@ import doctest
 import os
 import unittest
 
-def setUp(dir):
-    if os.path.isdir(dir):
-        rmtree(dir)
-    os.mkdir(dir)
-    os.chdir(dir)
+def setUp():
+    for file in os.listdir('.'):
+        if os.path.isdir(file):
+            rmtree(file)
+        else:
+            os.remove(file)
 
 def test_globs():
     import os
@@ -31,7 +32,7 @@ def test_globs():
     return locals()
 
 def test_suite():
-    setUp('work')
+    setUp()
 
     return unittest.TestSuite(
         doctest.DocFileSuite(
