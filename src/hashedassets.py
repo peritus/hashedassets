@@ -6,7 +6,7 @@ from optparse import OptionParser
 from os import remove, mkdir, walk
 from os.path import getmtime, join, exists, isdir, relpath,\
                     splitext, normpath, dirname, commonprefix
-from shutil import copy
+from shutil import copy2
 from signal import signal, SIGTERM, SIGHUP
 from sys import exit
 from time import sleep
@@ -170,7 +170,7 @@ class AssetHasher(object):
         self._hash_map[relpath(filename, self.input_dir)] = \
             (relpath(hashed_filename, self.output_dir), mtime)
 
-        copy(filename, hashed_filename)
+        copy2(filename, hashed_filename)
         print "cp '%s' '%s'"  % (filename, hashed_filename)
 
     def process_all_files(self):

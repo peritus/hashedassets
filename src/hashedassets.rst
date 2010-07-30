@@ -25,8 +25,11 @@ First, we create a file to be hashed:
 >>> system("mkdir input/subdir/")
 >>> with open("input/foo.txt", "w") as file:
 ...     file.write("foo")
+
 >>> with open("input/subdir/bar.txt", "w") as file:
 ...     file.write("bar")
+
+>>> system('touch -t200504072213.12 input/foo.txt')
 
 >>> def create_hash_map(ext=None):
 ...     if ext:
@@ -53,6 +56,14 @@ foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 map.txt
+
+Modification time is also preserved:
+
+>>> old_stat = os.stat("input/foo.txt")
+>>> new_stat = os.stat("output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt")
+>>> [(getattr(old_stat, prop) == getattr(new_stat, prop))
+...   for prop in ('st_mtime', 'st_atime', 'st_ino',)]
+[True, True, False]
 
 We can easily do this with multiple formats:
 
