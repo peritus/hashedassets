@@ -16,26 +16,19 @@ First, we create a file to be hashed:
 
 >>> system('touch -t200504072213.12 input/foo.txt')
 
->>> def create_hash_map(ext=None):
-...     if ext:
-...         system("hashedassets -m output/map.%s -n my_callback input/*.txt input/*/*.txt output/" % ext)
-...     else:
-...         system("hashedassets input/*.txt input/*/*.txt output/")
-...
-...     if ext:
-...         print open("output/map.%s" % ext).read()
-
 Simple usage
 ------------
 
->>> create_hash_map()
+>>> system("hashedassets input/*.txt input/*/*.txt output/")
 mkdir 'output'
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> create_hash_map('txt')
+>>> system("hashedassets -m output/map.txt -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("output/map.txt").read()
 subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 <BLANKLINE>
@@ -58,9 +51,11 @@ We can easily do this with multiple formats:
 JavaScript
 ++++++++++
 
->>> create_hash_map("js")
+>>> system("hashedassets -m output/map.js -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("output/map.js").read()
 var my_callback = {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -69,9 +64,11 @@ var my_callback = {
 JSON
 ++++
 
->>> create_hash_map("json")
+>>> system("hashedassets -m output/map.json -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("output/map.json").read()
 {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -80,9 +77,11 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 JSONP
 +++++
 
->>> create_hash_map("jsonp")
+>>> system("hashedassets -m output/map.jsonp -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("output/map.jsonp").read()
 my_callback({
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -93,9 +92,11 @@ Sass
 
 `Sass <http://sass-lang.com/>`_  is a meta language on top of CSS.
 
->>> create_hash_map("scss")
+>>> system("hashedassets -m output/map.scss -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("output/map.scss").read()
 @mixin my_callback($directive, $path) {
          @if $path == "subdir/bar.txt" { #{$directive}: url("Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"); }
     @else if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
@@ -108,9 +109,11 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 PHP
 +++
 
->>> create_hash_map("php")
+>>> system("hashedassets -m output/map.php -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("output/map.php").read()
 $my_callback = array(
   "subdir/bar.txt" => "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt",
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
@@ -121,9 +124,11 @@ Sed
 
 We can also generate a sed script that does the replacements for us:
 
->>> create_hash_map("sed")
+>>> system("hashedassets -m output/map.sed -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("output/map.sed").read()
 s/subdir\/bar\.txt/Ys23Ag_5IOWqZCw9QGaVDdHwH00\.txt/g
 s/foo\.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM\.txt/g
 <BLANKLINE>
