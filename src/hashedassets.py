@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 
 from base64 import urlsafe_b64encode
 from glob import glob
@@ -255,11 +255,16 @@ class AssetHasher(object):
 
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
-        self._hash_map = dict(
-            (filename, (hashed_filename, stat(join(self.output_dir, hashed_filename)).st_mtime))
-            for filename, hashed_filename
-            in deserialized.iteritems()
-        )
+        map = {}
+        for filename, hashed_filename in deserialized.iteritems():
+            try:
+                mtime = getmtime(join(self.output_dir, hashed_filename))
+                map[filename] = hashed_filename, mtime
+            except OSError, e:
+                assert 2 == e.errno
+                pass # file does not exists, so ignore
+
+        self._hash_map = map
 
     def write_map(self):
         if not self.map_filename:

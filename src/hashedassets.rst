@@ -199,6 +199,23 @@ If you then list the files in the directory, note that the old file
 QIDaFD7KLKQh0l5O6b8exdew3b0.txt
 Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 
+If we remove one of the created files, it gets recreated:
+>>> system("rm output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt")
+>>> system("hashedassets -m maps/map.json input/*.txt input/*/*.txt output/")
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> system("ls output/")
+QIDaFD7KLKQh0l5O6b8exdew3b0.txt
+Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
+
+If a file that is about to be removed because the original content changed, it
+isn't recreated:
+
+>>> system("rm output/QIDaFD7KLKQh0l5O6b8exdew3b0.txt")
+>>> with open("input/foo.txt", "w") as file:
+...     file.write("foofoofoo")
+>>> system("hashedassets -m maps/map.json input/*.txt input/*/*.txt output/")
+cp 'input/foo.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 Error handling
 --------------
