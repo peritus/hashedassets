@@ -15,11 +15,17 @@ def test_globs():
     import sys
     from subprocess import Popen, STDOUT, PIPE
     from shlex import split
+    from hashedassets import main
 
-    def system(cmd, env=None):
+    def system(cmd, env=None, external=False):
+        cmdline = split(cmd)
+
+        if not external and cmdline[0] == 'hashedassets':
+            return main(cmdline[1:])
+
         if env != None:
             env.update(os.environ)
-        process = Popen(split(cmd), stderr=STDOUT, stdout=PIPE, env=env)
+        process = Popen(cmdline, stderr=STDOUT, stdout=PIPE, env=env)
         # from http://stackoverflow.com/questions/1388753/how-to-get-output-from-subprocess-popen
         while True:
             out = process.stdout.read(1)

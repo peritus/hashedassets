@@ -205,12 +205,12 @@ Error handling
 
 However, if we run this with no arguments, it fails:
 
->>> system("hashedassets")
+>>> system("hashedassets", external=True)
 Usage: hashedassets [ -m MAPFILE [-t MAPTYPE] [-n MAPNAME]] SOURCE [...] DEST
 <BLANKLINE>
 hashedassets: error: You need to specify at least one file and a destination directory
 
->>> system("hashedassets -n doesnotmakesense input/*.txt output/")
+>>> system("hashedassets -n doesnotmakesense input/*.txt output/", external=True)
 Usage: hashedassets [ -m MAPFILE [-t MAPTYPE] [-n MAPNAME]] SOURCE [...] DEST
 <BLANKLINE>
 hashedassets: error: -n without -m does not make sense. Use -m to specify a map filename
