@@ -6,6 +6,7 @@ from optparse import OptionParser
 from os import remove, mkdir, walk, stat
 from os.path import getmtime, join, exists, isdir, relpath,\
                     splitext, normpath, dirname, commonprefix
+from re import split as re_split
 from shutil import copy2
 from signal import signal, SIGTERM, SIGHUP
 from sys import exit
@@ -25,6 +26,16 @@ class SimpleSerializer(object):
     @classmethod
     def serialize(cls, items, _):
         return "\n".join(["%s: %s" % item for item in items.iteritems()]) + "\n"
+
+    @classmethod
+    def deserialize(cls, string):
+        map = {}
+        for line in string.split("\n"):
+            if line == '':
+                continue
+            key, value = line.split(":")
+            map[key.strip()] = value.strip()
+        return map
 
 SERIALIZERS['txt'] = SimpleSerializer
 
@@ -48,13 +59,6 @@ if loads and dumps:
 
     SERIALIZERS['json'] = JSONSerializer
 
-    class JavaScriptSerializer(object):
-        @classmethod
-        def serialize(cls, items, map_name):
-            return ("var %s = " % map_name) + dumps(items, sort_keys=True, indent=2) + ";"
-
-    SERIALIZERS['js'] = JavaScriptSerializer
-
     class JSONPSerializer(object):
         @classmethod
         def serialize(cls, items, map_name):
@@ -63,7 +67,22 @@ if loads and dumps:
                     'dump': dumps(items, sort_keys=True, indent=2)
                     }
 
+        @classmethod
+        def deserialize(cls, string):
+            return loads(string[string.index("(")+1:string.rfind(")")])
+
     SERIALIZERS['jsonp'] = JSONPSerializer
+
+    class JavaScriptSerializer(object):
+        @classmethod
+        def serialize(cls, items, map_name):
+            return ("var %s = " % map_name) + dumps(items, sort_keys=True, indent=2) + ";"
+
+        @classmethod
+        def deserialize(cls, string):
+            return loads(string[string.index("=")+1:string.rfind(";")])
+
+    SERIALIZERS['js'] = JavaScriptSerializer
 
 class PreambleEntryEpiloqueSerializer(object):
     @classmethod
@@ -96,6 +115,13 @@ class SassSerializer(PreambleEntryEpiloqueSerializer):
     '}'
     )
 
+    @classmethod
+    def deserialize(cls, string):
+        map = {}
+        for line in string.split(";")[:-3]:
+            _, key, _, value, _ = line.split('"')
+            map[key] = value
+        return map
 
 SERIALIZERS['scss'] = SassSerializer
 
@@ -103,6 +129,14 @@ class PHPSerializer(PreambleEntryEpiloqueSerializer):
     PREAMBLE = '$%s = array(\n'
     ENTRY = '  "%s" => "%s",\n'
     EPILOQUE = ')'
+
+    @classmethod
+    def deserialize(cls, string):
+        map = {}
+        for line in string.split("\n")[1:-1]:
+            _, key, _, value, _ = line.split('"')
+            map[key] = value
+        return map
 
 SERIALIZERS['php'] = PHPSerializer
 
@@ -114,9 +148,17 @@ class SedSerializer(object):
     '''
     ENTRY = 's/%s/%s/g'
 
+    REPLACEMENTS = {
+        '/': '\\/',
+        '.': '\\.',
+    }
+
     @classmethod
-    def _escape_filename(cls, filename):
-        return filename.replace('/', '\\/').replace('.', '\\.')
+    def _escape_filename(cls, filename, reverse=False):
+        for key, value in cls.REPLACEMENTS.iteritems():
+            if reverse: key, value = value, key
+            filename = filename.replace(key, value)
+        return filename
 
     @classmethod
     def serialize(cls, items, map_name):
@@ -126,6 +168,19 @@ class SedSerializer(object):
             for key, value
             in items.iteritems()
             ]) + '\n'
+
+    @classmethod
+    def deserialize(cls, string):
+        map = {}
+        for line in string.split("\n"):
+            if line == '':
+                continue
+
+            _, key, value, _ = re_split("(?<=[^\\\])/", line)
+            key = cls._escape_filename(key.strip(), True)
+            value = cls._escape_filename(value.strip(), True)
+            map[key] = value
+        return map
 
 SERIALIZERS['sed'] = SedSerializer
 

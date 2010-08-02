@@ -167,9 +167,15 @@ Re-using a map
 ++++++++++++++
 
 The program reads in maps it created in a prior run to only copy files that
-haven't changed since. So, the following command does not copy any files:
+haven't changed since. So, the following commands do not copy any files:
 
+>>> system("hashedassets -m maps/map.scss input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.php input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.js input/*.txt input/*/*.txt output/")
 >>> system("hashedassets -m maps/map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.sed input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.jsonp input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.txt input/*.txt input/*/*.txt output/")
 
 If we touch one of the input files in between, the file will be read but not
 copied because the hashsum is the same:
@@ -192,6 +198,7 @@ If you then list the files in the directory, note that the old file
 >>> system("ls output/")
 QIDaFD7KLKQh0l5O6b8exdew3b0.txt
 Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
+
 
 Error handling
 --------------
