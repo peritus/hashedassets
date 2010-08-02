@@ -8,6 +8,7 @@ First, we create a file to be hashed:
 
 >>> system("mkdir input/")
 >>> system("mkdir input/subdir/")
+>>> system("mkdir maps/")
 >>> with open("input/foo.txt", "w") as file:
 ...     file.write("foo")
 
@@ -24,11 +25,11 @@ mkdir 'output'
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> system("hashedassets -m output/map.txt -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.txt -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("output/map.txt").read()
+>>> print open("maps/map.txt").read()
 subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 <BLANKLINE>
@@ -36,6 +37,8 @@ foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 >>> system("ls output/")
 C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
+
+>>> system("ls maps/")
 map.txt
 
 Modification time is also preserved:
@@ -51,11 +54,11 @@ We can easily do this with multiple formats:
 JavaScript
 ++++++++++
 
->>> system("hashedassets -m output/map.js -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.js -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("output/map.js").read()
+>>> print open("maps/map.js").read()
 var my_callback = {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -64,11 +67,11 @@ var my_callback = {
 JSON
 ++++
 
->>> system("hashedassets -m output/map.json -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.json -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("output/map.json").read()
+>>> print open("maps/map.json").read()
 {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -77,11 +80,11 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 JSONP
 +++++
 
->>> system("hashedassets -m output/map.jsonp -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.jsonp -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("output/map.jsonp").read()
+>>> print open("maps/map.jsonp").read()
 my_callback({
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -92,11 +95,11 @@ Sass
 
 `Sass <http://sass-lang.com/>`_  is a meta language on top of CSS.
 
->>> system("hashedassets -m output/map.scss -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.scss -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("output/map.scss").read()
+>>> print open("maps/map.scss").read()
 @mixin my_callback($directive, $path) {
          @if $path == "subdir/bar.txt" { #{$directive}: url("Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"); }
     @else if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
@@ -109,11 +112,11 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 PHP
 +++
 
->>> system("hashedassets -m output/map.php -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.php -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("output/map.php").read()
+>>> print open("maps/map.php").read()
 $my_callback = array(
   "subdir/bar.txt" => "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt",
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
@@ -124,11 +127,11 @@ Sed
 
 We can also generate a sed script that does the replacements for us:
 
->>> system("hashedassets -m output/map.sed -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.sed -n my_callback input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("output/map.sed").read()
+>>> print open("maps/map.sed").read()
 s/subdir\/bar\.txt/Ys23Ag_5IOWqZCw9QGaVDdHwH00\.txt/g
 s/foo\.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM\.txt/g
 <BLANKLINE>
@@ -140,7 +143,7 @@ We should also be able to use this directly with sed
 
 The script is then applied like this:
 
->>> system("sed -f output/map.sed replaceme.html")
+>>> system("sed -f maps/map.sed replaceme.html")
 <a href=C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt>bar</a>
 
 However, '.' is not treated as wildcard, so the following does not work
@@ -148,7 +151,7 @@ However, '.' is not treated as wildcard, so the following does not work
 >>> with open("replaceme2.html", "w") as file:
 ...     file.write('<a href=fooAtxt>bar</a>')
 
->>> system("sed -f output/map.sed replaceme2.html")
+>>> system("sed -f maps/map.sed replaceme2.html")
 <a href=fooAtxt>bar</a>
 
 Specifying the type via -t
@@ -166,7 +169,7 @@ Re-using a map
 The program reads in maps it created in a prior run to only copy files that
 haven't changed since. So, the following command does not copy any files:
 
->>> system("hashedassets -m output/map.json -n my_callback input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -m maps/map.json input/*.txt input/*/*.txt output/")
 
 Error handling
 --------------
