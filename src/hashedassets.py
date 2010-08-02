@@ -9,7 +9,7 @@ from os.path import getmtime, join, exists, isdir, relpath,\
 from re import split as re_split
 from shutil import copy2
 from signal import signal, SIGTERM, SIGHUP
-from sys import exit
+import sys
 from time import sleep
 from itertools import chain
 
@@ -281,7 +281,10 @@ class AssetHasher(object):
         self.process_all_files()
         self.write_map()
 
-def main():
+def main(args=None):
+    if args == None:
+        args = sys.argv[1:]
+
     parser = OptionParser(usage=
             "%prog [ -m MAPFILE [-t MAPTYPE] [-n MAPNAME]] SOURCE [...] DEST")
     parser.add_option("-m", "--map-file", dest="map_filename", type="string",
@@ -295,7 +298,7 @@ def main():
                        " [default: guessed from MAPFILE]", metavar="MAPTYPE",
                   choices=SERIALIZERS.keys())
 
-    (options, args) = parser.parse_args()
+    (options, args) = parser.parse_args(args)
 
     if len(args) < 2:
         parser.error("You need to specify at least one file and a destination directory")
@@ -323,4 +326,4 @@ def main():
     ).run()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
