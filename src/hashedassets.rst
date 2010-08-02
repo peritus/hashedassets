@@ -171,6 +171,28 @@ haven't changed since. So, the following command does not copy any files:
 
 >>> system("hashedassets -m maps/map.json input/*.txt input/*/*.txt output/")
 
+If we touch one of the input files in between, the file will be read but not
+copied because the hashsum is the same:
+
+>>> system('touch -t200504072214.12 input/foo.txt')
+>>> system("hashedassets -m maps/map.json input/*.txt input/*/*.txt output/")
+
+If we change the file's content, it will get a new name:
+
+>>> with open("input/foo.txt", "w") as file:
+...     file.write("foofoo")
+
+>>> system("hashedassets -m maps/map.json input/*.txt input/*/*.txt output/")
+rm 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+cp 'input/foo.txt' 'output/QIDaFD7KLKQh0l5O6b8exdew3b0.txt'
+
+If you then list the files in the directory, note that the old file
+''output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'' is gone:
+
+>>> system("ls output/")
+QIDaFD7KLKQh0l5O6b8exdew3b0.txt
+Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
+
 Error handling
 --------------
 

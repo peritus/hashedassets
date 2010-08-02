@@ -151,6 +151,7 @@ class AssetHasher(object):
         return urlsafe_b64encode(cls.hashfun(content).digest()[:cls.digestlength]).strip("=")
 
     def process_file(self, filename):
+        # hash the file
         _, extension = splitext(filename)
 
         hashed_filename = self.digest(open(filename).read())
@@ -161,24 +162,26 @@ class AssetHasher(object):
         mtime = getmtime(filename)
         hashed_filename = join(self.output_dir, hashed_filename)
 
-        try:
-            old_hashed_filename, old_mtime = self._hash_map[filename]
+        map_key = relpath(filename, self.input_dir)
+        map_value = relpath(hashed_filename, self.output_dir)
+
+        if map_key in self._hash_map:
+            old_hashed_filename, old_mtime = self._hash_map[map_key]
+            old_hashed_filename = join(self.output_dir, old_hashed_filename)
+
             if(hashed_filename == old_hashed_filename):
                 return
 
-            print "rm '%s'" % old_hashed_filename
             remove(old_hashed_filename)
-        except KeyError: # file not under surveillance
-            pass
-
-        map_key = relpath(filename, self.input_dir)
+            print "rm '%s'" % old_hashed_filename
+            del self._hash_map[map_key]
 
         # no work to do
         if map_key in self._hash_map:
             return
 
         # actually copy the file
-        self._hash_map[map_key] = (relpath(hashed_filename, self.output_dir), mtime)
+        self._hash_map[map_key] = (map_value, mtime)
         copy2(filename, hashed_filename)
         print "cp '%s' '%s'"  % (filename, hashed_filename)
 
