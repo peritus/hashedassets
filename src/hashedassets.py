@@ -291,9 +291,7 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = OptionParser(usage=
-            "%prog [ -m MAPFILE [-t MAPTYPE] [-n MAPNAME]] SOURCE [...] DEST")
-    parser.add_option("-m", "--map-file", dest="map_filename", type="string",
-                  help="Write from-to-map", metavar="MAPFILE")
+            "%prog [ options ] MAPFILE SOURCE [...] DEST")
     parser.add_option("-n", "--map-name", dest="map_name", type="string",
                   help="Name of the map [default: %default]", metavar="MAPNAME",
                   default="hashedassets")
@@ -305,16 +303,12 @@ def main(args=None):
 
     (options, args) = parser.parse_args(args)
 
-    if len(args) < 2:
-        parser.error("You need to specify at least one file and a destination directory")
+    if len(args) < 3:
+        parser.error("You need to specify at least MAPFILE SOURCE and DEST")
 
-    if options.map_name and \
-        parser.defaults['map_name'] != options.map_name and\
-        not options.map_filename:
-        parser.error("-n without -m does not make sense. Use -m to specify a map filename")
-
+    map_filename = args[0]
+    files = args[1:-1]
     output_dir = normpath(args[-1])
-    files = args[:-1]
 
     if not exists(output_dir):
         mkdir(output_dir)
@@ -325,7 +319,7 @@ def main(args=None):
     AssetHasher(
       files=files,
       output_dir=output_dir,
-      map_filename=options.map_filename,
+      map_filename=map_filename,
       map_name=options.map_name,
       map_type=options.map_type,
     ).run()
