@@ -14,11 +14,10 @@ from time import sleep
 from itertools import chain
 
 try:
-    # Python 2.5
-    from hashlib import sha1
+    from hashlib import sha1, md5 # Python 2.5
 except ImportError:
-    # Python 2.4
-    from sha import sha as sha1
+    from sha import sha as sha1   # Python 2.4
+    from md5 import md5
 
 SERIALIZERS = {}
 
@@ -185,10 +184,14 @@ class SedSerializer(object):
 SERIALIZERS['sed'] = SedSerializer
 
 class AssetHasher(object):
-    hashfun = sha1
+    HASHFUNS = {
+        'md5': md5,
+        'sha1': sha1,
+    }
 
     def __init__(self, files, output_dir, map_filename, map_name, map_type,
             digestlength=9999, # don't truncate
+            hashfun='sha1',
             ):
 
         self._hash_map = {} # actually, a map for hashes
@@ -204,6 +207,11 @@ class AssetHasher(object):
         self.input_dir = dirname(commonprefix(files))
 
         self.digestlength = digestlength
+
+        if hashfun == None:
+            hashfun = 'sha1'
+
+        self.hashfun = self.HASHFUNS[hashfun]
 
     def digest(self, content):
         return urlsafe_b64encode(self.hashfun(content).digest()).strip("=")[:self.digestlength]
@@ -307,6 +315,19 @@ def main(args=None):
                   help="Length of the generated filenames (w/o .ext) [default: %default]", metavar="LENGTH",
                   default=27)
 
+    parser.add_option(
+        "-d",
+        "--digest",
+        dest="hashfun",
+        type="choice",
+        help="Hash function to use. One of " +
+             ", ".join(AssetHasher.HASHFUNS.keys()) +
+             " [default: %default]",
+        metavar="HASHFUN",
+        choices=AssetHasher.HASHFUNS.keys(),
+        default='sha1',
+    )
+
     (options, args) = parser.parse_args(args)
 
     if len(args) < 3:
@@ -329,6 +350,7 @@ def main(args=None):
       map_name=options.map_name,
       map_type=options.map_type,
       digestlength=options.digestlength,
+      hashfun=options.hashfun,
     ).run()
 
 if __name__ == '__main__':

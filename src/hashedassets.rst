@@ -168,6 +168,15 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IO.txt'
 
 >>> system("rm output/C-7Hteo_D9.txt output/Ys23Ag_5IO.txt")
 
+Specifying the digest with -d
++++++++++++++++++++++++++++++
+
+>>> system("hashedassets -d md5 maps/shortmap.json input/*.txt input/*/*.txt output/")
+cp 'input/foo.txt' 'output/rL0Y20zC-Fzt72VPzMSk2A.txt'
+cp 'input/subdir/bar.txt' 'output/N7UdGUp1E-RbVvZSTy1R8g.txt'
+
+>>> system("rm output/rL0Y20zC-Fzt72VPzMSk2A.txt output/N7UdGUp1E-RbVvZSTy1R8g.txt")
+
 Re-using a map
 ++++++++++++++
 
