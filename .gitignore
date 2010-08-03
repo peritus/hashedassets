@@ -3,5 +3,6 @@ bin/buildout
 bin/hashedassets
 bin/test
 develop-eggs/hashedassets.egg-link
+dist/
 parts/test/
 src/hashedassets.egg-info/
