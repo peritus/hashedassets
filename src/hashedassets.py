@@ -22,6 +22,8 @@ except ImportError:
 
 logger = logging.getLogger("hashedassets")
 
+__version__ = 0, 2, '0a1'
+
 SERIALIZERS = {}
 
 class SimpleSerializer(object):
@@ -304,7 +306,13 @@ def main(args=None):
     if args == None:
         args = sys.argv[1:]
 
-    parser = OptionParser(usage="%prog [ options ] MAPFILE SOURCE [...] DEST")
+    version = ".".join(str(n) for n in __version__)
+
+    parser = OptionParser(
+      usage="%prog [ options ] MAPFILE SOURCE [...] DEST",
+      version="%prog " + version,
+      description='Version: %s' % version,
+    )
 
     parser.add_option(
       "-v",

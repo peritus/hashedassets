@@ -1,19 +1,23 @@
 #!/usr/bin/env python 
-from setuptools import setup, find_packages
 
-long_description="Serve your django webapp's static media by its hashsum"
+from setuptools import setup, find_packages
+from os.path import join, dirname
+
+sys.path.append(join(dirname(__file__), 'src'))
+from hashedassets import __version__
 
 name='hashedassets'
+
 setup(
     name=name,
-    version='0.0.1a',
+    version = ".".join(str(n) for n in __version__),
     url='http://www.python.org/pypi/'+name,
     license='Beerware',
     description='THE BEER-WARE LICENSE',
     author='Filip Noetzel',
     author_email='filip+pypi@j03.de',
-    long_description=long_description,
-
+    long_description=\
+      open(join(dirname(__file__), 'src', 'hashedassets.rst')).read(),
     packages=find_packages('src'),
     package_dir={'': 'src'},
     namespace_packages=[],
@@ -28,13 +32,10 @@ setup(
             'python-subunit==0.0.6',
             'junitxml==0.5',
             ],
-        fsevents=[
-            'MacFSEvents==0.2.1',
+        ),
+    entry_points = dict(
+        console_scripts=[
+            'hashedassets = hashedassets:main',
             ],
         ),
-    entry_points = {
-        'console_scripts' : [
-            'hashedassets = hashedassets:main',
-            ]
-        },
     )
