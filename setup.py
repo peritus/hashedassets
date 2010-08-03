@@ -17,10 +17,10 @@ setup(
     description='Copies files to filenames based on their contents',
     author='Filip Noetzel',
     author_email='filip+pypi@j03.de',
-    long_description=\
-      open(join(dirname(__file__), 'src', 'hashedassets.rst')).read(),
     packages=find_packages('src'),
     package_dir={'': 'src'},
+    long_description=\
+      open(join(dirname(__file__), 'src', 'hashedassets', 'hashedassets.rst')).read(),
     namespace_packages=[],
     include_package_data = True,
     install_requires=[
