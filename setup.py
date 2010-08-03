@@ -3,6 +3,7 @@
 from setuptools import setup, find_packages
 from os.path import join, dirname
 
+import sys
 sys.path.append(join(dirname(__file__), 'src'))
 from hashedassets import __version__
 

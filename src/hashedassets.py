@@ -22,7 +22,7 @@ except ImportError:
 
 logger = logging.getLogger("hashedassets")
 
-__version__ = 0, 2, '0a1'
+__version__ = 0, 2, '0a2'
 
 SERIALIZERS = {}
 
