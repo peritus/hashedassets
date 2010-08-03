@@ -306,35 +306,61 @@ def main(args=None):
 
     parser = OptionParser(usage="%prog [ options ] MAPFILE SOURCE [...] DEST")
 
-    parser.add_option("-n", "--map-name", dest="map_name", type="string",
-                  help="Name of the map [default: %default]", metavar="MAPNAME",
-                  default="hashedassets")
-    parser.add_option("-t", "--map-type", dest="map_type", type="choice",
-                  help="One of " +
-                       ", ".join(SERIALIZERS.keys()) +
-                       " [default: guessed from MAPFILE]", metavar="MAPTYPE",
-                  choices=SERIALIZERS.keys())
-    parser.add_option("-l", "--digest-length", dest="digestlength", type="int",
-                  help="Length of the generated filenames (w/o .ext) [default: %default]", metavar="LENGTH",
-                  default=27)
-
     parser.add_option(
-        "-d",
-        "--digest",
-        dest="hashfun",
-        type="choice",
-        help="Hash function to use. One of " +
-             ", ".join(AssetHasher.HASHFUNS.keys()) +
-             " [default: %default]",
-        metavar="HASHFUN",
-        choices=AssetHasher.HASHFUNS.keys(),
-        default='sha1',
+      "-v",
+      "--verbose",
+      action="count",
+      dest="verbosity",
+      help="increase verbosity level"
     )
 
-    parser.add_option("-v", "--verbose", action="count", dest="verbosity",
-            help="Increase verbosity level")
-    parser.add_option("-q", "--quiet", action="store_const", const=0,
-            dest="verbosity", help="Don't print status messages to stdout")
+    parser.add_option(
+      "-q",
+      "--quiet",
+      action="store_const",
+      const=0,
+      dest="verbosity",
+      help="don't print status messages to stdout"
+    )
+    parser.add_option(
+      "-n",
+      "--map-name",
+      default="hashedassets",
+      dest="map_name",
+      help="name of the map [default: %default]",
+      metavar="MAPNAME",
+      type="string",
+    )
+
+    parser.add_option(
+      "-t",
+      "--map-type",
+      choices=SERIALIZERS.keys(),
+      dest="map_type",
+      help="type of the map. one of " + ", ".join(SERIALIZERS.keys()) + " [default: guessed from MAPFILE]",
+      metavar="MAPTYPE",
+      type="choice",
+    )
+
+    parser.add_option(
+      "-l",
+      "--digest-length",
+      default=27,
+      dest="digestlength",
+      help="length of the generated filenames (without extension) [default: %default]",
+      metavar="LENGTH",
+      type="int",
+    )
+    parser.add_option(
+      "-d",
+      "--digest",
+      choices=AssetHasher.HASHFUNS.keys(),
+      default='sha1',
+      dest="hashfun",
+      help="hash function to use. One of " + ", ".join(AssetHasher.HASHFUNS.keys()) + " [default: %default]",
+      metavar="HASHFUN",
+      type="choice",
+    )
 
     (options, args) = parser.parse_args(args)
 
