@@ -1,6 +1,14 @@
 hashedassets
 ============
 
+A command line tool that copies files to filenames based on their contents. It
+also writes a map of what was renamed to what, so you can find your files.
+
+Main purpose of this is that you can `add a far future Expires header to your
+components <http://stevesouders.com/hpws/rule-expires.php>`_. Using hash based
+filenames is a lot better than using your $VCS revision number, because users
+only need to download files that didn't change.
+
 Creating some source files
 --------------------------
 
@@ -228,6 +236,7 @@ QIDaFD7KLKQh0l5O6b8exdew3b0.txt
 Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 
 If we remove one of the created files, it gets recreated:
+
 >>> system("rm output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt")
 >>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'

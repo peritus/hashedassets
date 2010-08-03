@@ -13,7 +13,7 @@ setup(
     version = ".".join(str(n) for n in __version__),
     url='http://www.python.org/pypi/'+name,
     license='Beerware',
-    description='THE BEER-WARE LICENSE',
+    description='Copies files to filenames based on their contents',
     author='Filip Noetzel',
     author_email='filip+pypi@j03.de',
     long_description=\
