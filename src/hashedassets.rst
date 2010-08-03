@@ -150,8 +150,8 @@ However, '.' is not treated as wildcard, so the following does not work
 >>> system("sed -f maps/map.sed replaceme2.html")
 <a href=fooAtxt>bar</a>
 
-Specifying the type via -t
-++++++++++++++++++++++++++
+Specifying the type with -t
++++++++++++++++++++++++++++
 
 The type of the map is guessed from the filename, but you can specify it as well:
 
@@ -159,8 +159,8 @@ The type of the map is guessed from the filename, but you can specify it as well
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
-Specifying the length of the filename via -l
-++++++++++++++++++++++++++++++++++++++++++++
+Specifying the length of the filename with -l
++++++++++++++++++++++++++++++++++++++++++++++
 
 >>> system("hashedassets -l 10 maps/shortmap.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9.txt'
