@@ -37,6 +37,20 @@ Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 >>> system("ls maps/")
 map.txt
 
+Logging level
++++++++++++++
+
+If we tell the command to be quiet, it does not print what it is doing:
+
+>>> system("hashedassets -q maps/map2.txt input/*.txt input/*/*.txt output/")
+
+If we tell the command to be more verbose, it logs more information:
+
+>>> system("hashedassets -vvv maps/map3.txt input/*.txt input/*/*.txt output/")
+Debug level set to 10
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
 Modification time is also preserved:
 
 >>> old_stat = os.stat("input/foo.txt")

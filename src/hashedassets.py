@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from base64 import urlsafe_b64encode
+import logging
 from glob import glob
 from optparse import OptionParser
 from os import remove, mkdir, walk, stat
@@ -18,6 +19,8 @@ try:
 except ImportError:
     from sha import sha as sha1   # Python 2.4
     from md5 import md5
+
+logger = logging.getLogger("hashedassets")
 
 SERIALIZERS = {}
 
@@ -239,7 +242,7 @@ class AssetHasher(object):
                 return
 
             remove(old_hashed_filename)
-            print "rm '%s'" % old_hashed_filename
+            logger.info("rm '%s'", old_hashed_filename)
             del self._hash_map[map_key]
 
         # no work to do
@@ -249,7 +252,7 @@ class AssetHasher(object):
         # actually copy the file
         self._hash_map[map_key] = (map_value, mtime)
         copy2(filename, hashed_filename)
-        print "cp '%s' '%s'"  % (filename, hashed_filename)
+        logger.info("cp '%s' '%s'", filename, hashed_filename)
 
     def process_all_files(self):
         for file in self.files:
@@ -301,8 +304,8 @@ def main(args=None):
     if args == None:
         args = sys.argv[1:]
 
-    parser = OptionParser(usage=
-            "%prog [ options ] MAPFILE SOURCE [...] DEST")
+    parser = OptionParser(usage="%prog [ options ] MAPFILE SOURCE [...] DEST")
+
     parser.add_option("-n", "--map-name", dest="map_name", type="string",
                   help="Name of the map [default: %default]", metavar="MAPNAME",
                   default="hashedassets")
@@ -328,7 +331,27 @@ def main(args=None):
         default='sha1',
     )
 
+    parser.add_option("-v", "--verbose", action="count", dest="verbosity",
+            help="Increase verbosity level")
+    parser.add_option("-q", "--quiet", action="store_const", const=0,
+            dest="verbosity", help="Don't print status messages to stdout")
+
     (options, args) = parser.parse_args(args)
+
+    if options.verbosity == None:
+        options.verbosity = 1
+
+    if len(logger.handlers) == 0:
+        ch = logging.StreamHandler(sys.stdout)
+        logger.addHandler(ch)
+
+    log_level = {
+        0: logging.ERROR,
+        1: logging.INFO,
+        2: logging.DEBUG,
+    }.get(options.verbosity, logging.DEBUG)
+    logger.setLevel(log_level)
+    logger.debug("Debug level set to %d", log_level)
 
     if len(args) < 3:
         parser.error("You need to specify at least MAPFILE SOURCE and DEST")
@@ -339,7 +362,7 @@ def main(args=None):
 
     if not exists(output_dir):
         mkdir(output_dir)
-        print "mkdir '%s'" % output_dir
+        logger.info("mkdir '%s'", output_dir)
     elif not isdir(output_dir):
         parser.error("Output dir at '%s' is not a directory" % output_dir)
 
