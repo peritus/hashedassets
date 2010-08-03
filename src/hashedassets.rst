@@ -159,7 +159,14 @@ The type of the map is guessed from the filename, but you can specify it as well
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
+Specifying the length of the filename via -l
+++++++++++++++++++++++++++++++++++++++++++++
 
+>>> system("hashedassets -l 10 maps/shortmap.json input/*.txt input/*/*.txt output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9.txt'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IO.txt'
+
+>>> system("rm output/C-7Hteo_D9.txt output/Ys23Ag_5IO.txt")
 
 Re-using a map
 ++++++++++++++

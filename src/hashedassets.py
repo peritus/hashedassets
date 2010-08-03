@@ -186,9 +186,11 @@ SERIALIZERS['sed'] = SedSerializer
 
 class AssetHasher(object):
     hashfun = sha1
-    digestlength = 9999 # "don't truncate"
 
-    def __init__(self, files, output_dir, map_filename, map_name, map_type):
+    def __init__(self, files, output_dir, map_filename, map_name, map_type,
+            digestlength=9999, # don't truncate
+            ):
+
         self._hash_map = {} # actually, a map for hashes
 
         if not map_type and map_filename:
@@ -201,9 +203,10 @@ class AssetHasher(object):
         self.files = chain.from_iterable([glob(path) for path in files])
         self.input_dir = dirname(commonprefix(files))
 
-    @classmethod
-    def digest(cls, content):
-        return urlsafe_b64encode(cls.hashfun(content).digest()[:cls.digestlength]).strip("=")
+        self.digestlength = digestlength
+
+    def digest(self, content):
+        return urlsafe_b64encode(self.hashfun(content).digest()).strip("=")[:self.digestlength]
 
     def process_file(self, filename):
         # hash the file
@@ -300,6 +303,9 @@ def main(args=None):
                        ", ".join(SERIALIZERS.keys()) +
                        " [default: guessed from MAPFILE]", metavar="MAPTYPE",
                   choices=SERIALIZERS.keys())
+    parser.add_option("-l", "--digest-length", dest="digestlength", type="int",
+                  help="Length of the generated filenames (w/o .ext) [default: %default]", metavar="LENGTH",
+                  default=27)
 
     (options, args) = parser.parse_args(args)
 
@@ -322,6 +328,7 @@ def main(args=None):
       map_filename=map_filename,
       map_name=options.map_name,
       map_type=options.map_type,
+      digestlength=options.digestlength,
     ).run()
 
 if __name__ == '__main__':
