@@ -5,7 +5,7 @@ import logging
 from glob import glob
 from optparse import OptionParser
 from os import remove, mkdir, walk, stat
-from os.path import getmtime, join, exists, isdir, relpath,\
+from os.path import getmtime, join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix
 from re import split as re_split
 from shutil import copy2
@@ -37,13 +37,13 @@ class SimpleSerializer(object):
 
     @classmethod
     def deserialize(cls, string):
-        map = {}
+        result = {}
         for line in string.split("\n"):
             if line == '':
                 continue
             key, value = line.split(":")
-            map[key.strip()] = value.strip()
-        return map
+            result[key.strip()] = value.strip()
+        return result
 
 SERIALIZERS['txt'] = SimpleSerializer
 
@@ -96,7 +96,11 @@ if loads and dumps:
     SERIALIZERS['js'] = JavaScriptSerializer
 
 
-class PreambleEntryEpiloqueSerializer(object):
+class PreambleEntryEpiloqueSerializer(object):  # pylint: disable=R0903
+    PREAMBLE = ''
+    ENTRY = ''
+    EPILOQUE = ''
+
     @classmethod
     def serialize(cls, items, map_name):
         return (
@@ -125,11 +129,11 @@ class SassSerializer(PreambleEntryEpiloqueSerializer):
 
     @classmethod
     def deserialize(cls, string):
-        map = {}
+        result = {}
         for line in string.split(";")[:-3]:
             _, key, _, value, _ = line.split('"')
-            map[key] = value
-        return map
+            result[key] = value
+        return result
 
 SERIALIZERS['scss'] = SassSerializer
 
@@ -141,11 +145,11 @@ class PHPSerializer(PreambleEntryEpiloqueSerializer):
 
     @classmethod
     def deserialize(cls, string):
-        map = {}
+        result = {}
         for line in string.split("\n")[1:-1]:
             _, key, _, value, _ = line.split('"')
-            map[key] = value
-        return map
+            result[key] = value
+        return result
 
 SERIALIZERS['php'] = PHPSerializer
 
@@ -172,7 +176,7 @@ class SedSerializer(object):
         return filename
 
     @classmethod
-    def serialize(cls, items, map_name):
+    def serialize(cls, items, _):
         return "\n".join([
             (cls.ENTRY % (cls._escape_filename(key),
                 cls._escape_filename(value)))
@@ -181,7 +185,7 @@ class SedSerializer(object):
 
     @classmethod
     def deserialize(cls, string):
-        map = {}
+        result = {}
         for line in string.split("\n"):
             if line == '':
                 continue
@@ -189,8 +193,8 @@ class SedSerializer(object):
             _, key, value, _ = re_split("(?<=[^\\\])/", line)
             key = cls._escape_filename(key.strip(), True)
             value = cls._escape_filename(value.strip(), True)
-            map[key] = value
-        return map
+            result[key] = value
+        return result
 
 SERIALIZERS['sed'] = SedSerializer
 
@@ -246,7 +250,7 @@ class AssetHasher(object):
         map_value = relpath(hashed_filename, self.output_dir)
 
         if map_key in self._hash_map:
-            old_hashed_filename, old_mtime = self._hash_map[map_key]
+            old_hashed_filename, _ = self._hash_map[map_key]
             old_hashed_filename = join(self.output_dir, old_hashed_filename)
 
             if(hashed_filename == old_hashed_filename):
@@ -266,8 +270,8 @@ class AssetHasher(object):
         logger.info("cp '%s' '%s'", filename, hashed_filename)
 
     def process_all_files(self):
-        for file in self.files:
-            self.process_file(file)
+        for f in self.files:
+            self.process_file(f)
 
     def read_map(self):
         if not self.map_filename:
@@ -280,16 +284,15 @@ class AssetHasher(object):
 
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
-        map = {}
+        result = {}
         for filename, hashed_filename in deserialized.iteritems():
             try:
                 mtime = getmtime(join(self.output_dir, hashed_filename))
-                map[filename] = hashed_filename, mtime
+                result[filename] = hashed_filename, mtime
             except OSError, e:
-                assert 2 == e.errno
-                pass  # file does not exists, so ignore
+                assert 2 == e.errno  # file does not exists, so ignore
 
-        self._hash_map = map
+        self._hash_map = result
 
     def write_map(self):
         if not self.map_filename:
@@ -302,8 +305,8 @@ class AssetHasher(object):
 
         serialized = SERIALIZERS[self.map_type].serialize(items, self.map_name)
 
-        with open(self.map_filename, "w") as file:
-            file.write(serialized)
+        with open(self.map_filename, "w") as f:
+            f.write(serialized)
 
     def run(self):
         self.read_map()

@@ -1,14 +1,15 @@
+from os import listdir, remove
+from os.path import isdir
 from shutil import rmtree
 import doctest
-import os
 import unittest
 
 def setUp():
-    for file in os.listdir('.'):
-        if os.path.isdir(file):
-            rmtree(file)
+    for afile in listdir('.'):
+        if isdir(afile):
+            rmtree(afile)
         else:
-            os.remove(file)
+            remove(afile)
 
 def test_globs():
     import os
@@ -17,7 +18,7 @@ def test_globs():
     from shlex import split
     from hashedassets import main
 
-    def system(cmd, env=None, external=False):
+    def system(cmd, env=None, external=False):  # pylint: disable=W0612
         cmdline = split(cmd)
 
         if not external and cmdline[0] == 'hashedassets':
