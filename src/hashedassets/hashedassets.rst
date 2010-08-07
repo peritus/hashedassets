@@ -1,29 +1,23 @@
-hashedassets
-============
 
-A command line tool that copies files to filenames based on their contents. It
-also writes a map of what was renamed to what, so you can find your files.
-
-Main purpose of this is that you can `add a far future Expires header to your
-components <http://stevesouders.com/hpws/rule-expires.php>`_. Using hash based
-filenames is a lot better than using your $VCS revision number, because users
-only need to download files that didn't change.
+.. contents:: Table of Contents
 
 Creating some source files
 --------------------------
 
-First, we create a file to be hashed:
+For this demo, we'll create a few files that will be used throughout the whole
+process:
+
+>>> system("mkdir maps/")
 
 >>> system("mkdir input/")
+>>> write("input/foo.txt", "foo")
+
+We also create files that live in a sub- and subsubdirectories:
+
 >>> system("mkdir input/subdir/")
->>> system("mkdir maps/")
->>> with open("input/foo.txt", "w") as file:
-...     file.write("foo")
-
->>> with open("input/subdir/bar.txt", "w") as file:
-...     file.write("bar")
-
->>> system('touch -t200504072213.12 input/foo.txt')
+>>> write("input/subdir/bar.txt", "bar")
+>>> system("mkdir input/subdir/2nd/")
+>>> write("input/subdir/2nd/baz.txt", "foofoofoo")
 
 Simple usage
 ------------
@@ -32,6 +26,9 @@ Simple usage
 mkdir 'output'
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> system("ls maps/")
+map.txt
 
 >>> print open("maps/map.txt").read()
 subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
@@ -42,23 +39,6 @@ foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 
->>> system("ls maps/")
-map.txt
-
-Logging level
-+++++++++++++
-
-If we tell the command to be quiet, it does not print what it is doing:
-
->>> system("hashedassets -q maps/map2.txt input/*.txt input/*/*.txt output/")
-
-If we tell the command to be more verbose, it logs more information:
-
->>> system("hashedassets -vvv maps/map3.txt input/*.txt input/*/*.txt output/")
-Debug level set to 10
-cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
-
 Modification time is also preserved:
 
 >>> old_stat = os.stat("input/foo.txt")
@@ -67,7 +47,39 @@ Modification time is also preserved:
 ...   for prop in ('st_mtime', 'st_atime', 'st_ino',)]
 [True, True, False]
 
+Output formats
+--------------
+
 We can easily do this with multiple formats:
+
+Sed
++++
+
+This generates a sed script that does the replacements for us:
+
+>>> system("hashedassets -n my_callback maps/map.sed input/*.txt input/*/*.txt output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open("maps/map.sed").read()
+s/subdir\/bar\.txt/Ys23Ag_5IOWqZCw9QGaVDdHwH00\.txt/g
+s/foo\.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM\.txt/g
+<BLANKLINE>
+
+We should be able to use this with sed on this file:
+
+>>> write("replaceme.html", "<a href=foo.txt>bar</a>")
+
+The script is then applied like this:
+
+>>> system("sed -f maps/map.sed replaceme.html")
+<a href=C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt>bar</a>
+
+Note '.' is not treated as wildcard, so the following does not work
+
+>>> write("replaceme2.html", "<a href=fooAtxt>bar</a>")
+>>> system("sed -f maps/map.sed replaceme2.html")
+<a href=fooAtxt>bar</a>
 
 JavaScript
 ++++++++++
@@ -108,10 +120,10 @@ my_callback({
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
 });
 
-Sass
+SCSS
 ++++
 
-`Sass <http://sass-lang.com/>`_  is a meta language on top of CSS.
+`Sass <http://sass-lang.com/>`__ ("Syntactically Awesome Stylesheets") is a meta language on top of CSS.
 
 >>> system("hashedassets -n my_callback maps/map.scss input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -140,42 +152,15 @@ $my_callback = array(
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
 )
 
-Sed
-+++
 
-We can also generate a sed script that does the replacements for us:
-
->>> system("hashedassets -n my_callback maps/map.sed input/*.txt input/*/*.txt output/")
-cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
-cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
-
->>> print open("maps/map.sed").read()
-s/subdir\/bar\.txt/Ys23Ag_5IOWqZCw9QGaVDdHwH00\.txt/g
-s/foo\.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM\.txt/g
-<BLANKLINE>
-
-We should also be able to use this directly with sed
-
->>> with open("replaceme.html", "w") as file:
-...     file.write('<a href=foo.txt>bar</a>')
-
-The script is then applied like this:
-
->>> system("sed -f maps/map.sed replaceme.html")
-<a href=C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt>bar</a>
-
-However, '.' is not treated as wildcard, so the following does not work
-
->>> with open("replaceme2.html", "w") as file:
-...     file.write('<a href=fooAtxt>bar</a>')
-
->>> system("sed -f maps/map.sed replaceme2.html")
-<a href=fooAtxt>bar</a>
+Options
+-------
 
 Specifying the type with -t
 +++++++++++++++++++++++++++
 
-The type of the map is guessed from the filename, but you can specify it as well:
+The type of the map is guessed from the filename, but you can specify it as
+well:
 
 >>> system("hashedassets -t js cantguessmaptype input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -193,24 +178,47 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IO.txt'
 Specifying the digest with -d
 +++++++++++++++++++++++++++++
 
+Hashedassets uses sha1 by default to hash the input files. You can change that
+with the -d command line parameter, e.g. by specifying -d md5 to use the md5
+digest method.
+
 >>> system("hashedassets -d md5 maps/shortmap.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/rL0Y20zC-Fzt72VPzMSk2A.txt'
 cp 'input/subdir/bar.txt' 'output/N7UdGUp1E-RbVvZSTy1R8g.txt'
 
 >>> system("rm output/rL0Y20zC-Fzt72VPzMSk2A.txt output/N7UdGUp1E-RbVvZSTy1R8g.txt")
 
-
 Keep the directory structure with --keep-dirs
 +++++++++++++++++++++++++++++++++++++++++++++
 
-By default hashedassets copies all output files into the root level of the output dir. You can turn this off, with the --keep-dirs option:
+By default hashedassets copies all output files into the root level of the
+output dir. You can turn this off, with the ''--keep-dirs'' option:
 
->>> system("hashedassets --keep-dirs maps/preserve.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets --keep-dirs maps/preserve.json input/*.txt input/*/*.txt input/*/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 mkdir -p output/subdir
 cp 'input/subdir/bar.txt' 'output/subdir/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+mkdir -p output/subdir/2nd
+cp 'input/subdir/2nd/baz.txt' 'output/subdir/2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 >>> system("rm -r output/subdir/")
+
+Verbose mode with -v
+++++++++++++++++++++
+
+If we tell the command to be quiet, it does not print what it is doing:
+
+>>> system("hashedassets -q maps/map2.txt input/*.txt input/*/*.txt output/")
+
+If we tell the command to be more verbose, it logs more information:
+
+>>> system("hashedassets -vvv maps/map3.txt input/*.txt input/*/*.txt output/")
+Debug level set to 10
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+Advanced usage
+--------------
 
 Re-using a map
 ++++++++++++++
@@ -234,8 +242,9 @@ copied because the hashsum is the same:
 
 If we change the file's content, it will get a new name:
 
->>> with open("input/foo.txt", "w") as file:
-...     file.write("foofoo")
+>>> write("input/foo.txt", "foofoo")
+
+Then try again:
 
 >>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
 rm 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -262,17 +271,42 @@ If a file that is about to be removed because the original content changed, it
 isn't recreated:
 
 >>> system("rm output/QIDaFD7KLKQh0l5O6b8exdew3b0.txt")
->>> with open("input/foo.txt", "w") as file:
-...     file.write("foofoofoo")
+>>> write("input/foo.txt", "foofoofoo")
 >>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 Error handling
 --------------
 
-However, if we run this with no arguments, it fails:
+If try to use the software with no arguments the user is reminded to specify at
+least the mapfile, the source and the destination directory:
 
 >>> system("hashedassets", external=True)
 Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
 <BLANKLINE>
 hashedassets: error: You need to specify at least MAPFILE SOURCE and DEST
+
+If the user specifies the --help option, detailed usage information is shown:
+
+>>> system("hashedassets --help", external=True)
+Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
+<BLANKLINE>
+Version: ...
+<BLANKLINE>
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -v, --verbose         increase verbosity level
+  -q, --quiet           don't print status messages to stdout
+  -n MAPNAME, --map-name=MAPNAME
+                        name of the map [default: hashedassets]
+  -t MAPTYPE, --map-type=MAPTYPE
+                        type of the map. one of scss, php, js, json, sed,
+                        jsonp, txt [default: guessed from MAPFILE]
+  -l LENGTH, --digest-length=LENGTH
+                        length of the generated filenames (without extension)
+                        [default: 27]
+  -d HASHFUN, --digest=HASHFUN
+                        hash function to use. One of sha1, md5 [default: sha1]
+  -k, --keep-dirs       Mirror SOURCE dir structure to DEST [default: false]
+

@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+'''
+A command line tool that copies files to filenames based on their contents. It
+also writes a map of what was renamed to what, so you can find your files.
+
+Main purpose of this is that you can `add a far future Expires header to your
+components <http://stevesouders.com/hpws/rule-expires.php>`__. Using hash based
+filenames is a lot better than using your $VCS revision number, because users
+only need to download files that didn't change.
+
+'''
+
 from base64 import urlsafe_b64encode
 import logging
 from glob import glob

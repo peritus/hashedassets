@@ -36,6 +36,10 @@ def test_globs():
                 sys.stdout.write(out)
                 sys.stdout.flush()
 
+    def write(filename, content):  # pylint: disable=W0612
+        with open(filename, "w") as writeme:
+            writeme.write(content)
+
     return locals()
 
 def test_suite():

@@ -5,22 +5,29 @@ from os.path import join, dirname
 
 import sys
 sys.path.append(join(dirname(__file__), 'src'))
-from hashedassets import __version__
+import hashedassets
+
+long_description=(
+    hashedassets.__doc__ + \
+    '\n' + \
+    open(join(dirname(__file__),
+         'src',
+         'hashedassets',
+         'hashedassets.rst')).read())
 
 name='hashedassets'
 
 setup(
     name=name,
-    version = ".".join(str(n) for n in __version__),
+    version = ".".join(str(n) for n in hashedassets.__version__),
     url='http://www.python.org/pypi/'+name,
     license='Beerware',
     description='Copies files to filenames based on their contents',
+    long_description=long_description,
     author='Filip Noetzel',
     author_email='filip+pypi@j03.de',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    long_description=\
-      open(join(dirname(__file__), 'src', 'hashedassets', 'hashedassets.rst')).read(),
     namespace_packages=[],
     include_package_data = True,
     install_requires=[
