@@ -212,12 +212,6 @@ SERIALIZERS['sed'] = SedSerializer
 
 
 class AssetHasher(object):
-
-    HASHFUNS = {
-        'md5': md5,
-        'sha1': sha1,
-    }
-
     def __init__(self, files, output_dir, map_filename, map_name, map_type,
             keep_dirs=False,
             digestlength=9999,  # don't truncate
@@ -242,17 +236,20 @@ class AssetHasher(object):
         if hashfun == None:
             hashfun = 'sha1'
 
-        self.hashfun = self.HASHFUNS[hashfun]
+        self.hashfun = hashfun
 
     def digest(self, fun, filename):
         _, extension = splitext(filename)
 
-        hashed_filename = urlsafe_b64encode(
-                fun(open(filename).read()).digest()).strip("=")\
-                        [:self.digestlength]
-
-        if extension:
-            hashed_filename = "%s%s" % (hashed_filename, extension)
+        if fun == 'identity':
+            _, hashed_filename = path_split(filename)
+        else:
+            fun = {'md5': md5, 'sha1': sha1}[fun]
+            hashed_filename = urlsafe_b64encode(
+                    fun(open(filename).read()).digest()).strip("=")\
+                            [:self.digestlength]
+            if extension:
+                hashed_filename = "%s%s" % (hashed_filename, extension)
 
         extra_dirs = ''
 
@@ -411,12 +408,10 @@ def main(args=None):
     parser.add_option(
       "-d",
       "--digest",
-      choices=AssetHasher.HASHFUNS.keys(),
+      choices=('sha1', 'md5'),
       default='sha1',
       dest="hashfun",
-      help="hash function to use. One of "
-         + ", ".join(AssetHasher.HASHFUNS.keys())
-         + " [default: %default]",
+      help="hash function to use. One of sha1, md5 [default: %default]",
       metavar="HASHFUN",
       type="choice",
     )
@@ -430,7 +425,20 @@ def main(args=None):
       help="Mirror SOURCE dir structure to DEST [default: false]",
     )
 
+    parser.add_option(
+      "-i",
+      "--identity",
+      action="store_true",
+      dest="identity",
+      default=False,
+      help="Don't actually map, keep all file names",
+    )
+
     (options, args) = parser.parse_args(args)
+
+    if options.identity:
+        options.hashfun = 'identity'
+        options.keep_dirs = True
 
     if options.verbosity == None:
         options.verbosity = 1

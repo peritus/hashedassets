@@ -203,6 +203,29 @@ cp 'input/subdir/2nd/baz.txt' 'output/subdir/2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
 
 >>> system("rm -r output/subdir/")
 
+Don't map anything with --identity
+++++++++++++++++++++++++++++++++++
+
+If you specify ''--identity'' the program will create a map that maps every
+file to itself, similar to how the `identity function
+<http://en.wikipedia.org/wiki/Identity_function>`__ is defined. You can use
+this if you want to disable hashedassets temporarily, but don't want to alter
+your build script heavily:
+
+>>> system("hashedassets --identity maps/identitymap.json input/*.txt input/*/*.txt output/")
+cp 'input/foo.txt' 'output/foo.txt'
+mkdir -p output/subdir
+cp 'input/subdir/bar.txt' 'output/subdir/bar.txt'
+
+>>> print open('maps/identitymap.json').read()
+{
+  "foo.txt": "foo.txt",
+  "subdir/bar.txt": "subdir/bar.txt"
+}
+
+
+>>> system("rm -r output/foo.txt output/subdir/")
+
 Verbose mode with -v
 ++++++++++++++++++++
 
@@ -307,6 +330,8 @@ Options:
                         length of the generated filenames (without extension)
                         [default: 27]
   -d HASHFUN, --digest=HASHFUN
-                        hash function to use. One of sha1, md5 [default: sha1]
+                        hash function to use. One of sha1, md5
+                        [default: sha1]
   -k, --keep-dirs       Mirror SOURCE dir structure to DEST [default: false]
+  -i, --identity        Don't actually map, keep all file names
 
