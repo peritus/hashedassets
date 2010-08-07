@@ -15,9 +15,9 @@ from time import sleep
 from itertools import chain
 
 try:
-    from hashlib import sha1, md5 # Python 2.5
+    from hashlib import sha1, md5  # Python 2.5
 except ImportError:
-    from sha import sha as sha1   # Python 2.4
+    from sha import sha as sha1    # Python 2.4
     from md5 import md5
 
 logger = logging.getLogger("hashedassets")
@@ -26,10 +26,14 @@ __version__ = 0, 2, '1dev0'
 
 SERIALIZERS = {}
 
+
 class SimpleSerializer(object):
     @classmethod
     def serialize(cls, items, _):
-        return "\n".join(["%s: %s" % item for item in items.iteritems()]) + "\n"
+        return "\n".join([
+            "%s: %s" % item
+            for item
+            in items.iteritems()]) + "\n"
 
     @classmethod
     def deserialize(cls, string):
@@ -52,6 +56,7 @@ except ImportError:
         loads, dumps = (None, None)
 
 if loads and dumps:
+
     class JSONSerializer(object):
         @classmethod
         def serialize(cls, items, _):
@@ -68,25 +73,28 @@ if loads and dumps:
         def serialize(cls, items, map_name):
             return "%(map_name)s(%(dump)s);" % {
                     'map_name': map_name,
-                    'dump': dumps(items, sort_keys=True, indent=2)
-                    }
+                    'dump': dumps(items, sort_keys=True, indent=2)}
 
         @classmethod
         def deserialize(cls, string):
-            return loads(string[string.index("(")+1:string.rfind(")")])
+            return loads(string[string.index("(") + 1:string.rfind(")")])
 
     SERIALIZERS['jsonp'] = JSONPSerializer
 
     class JavaScriptSerializer(object):
         @classmethod
         def serialize(cls, items, map_name):
-            return ("var %s = " % map_name) + dumps(items, sort_keys=True, indent=2) + ";"
+            return (
+                "var %s = " % map_name
+                + dumps(items, sort_keys=True, indent=2)
+                + ";")
 
         @classmethod
         def deserialize(cls, string):
-            return loads(string[string.index("=")+1:string.rfind(";")])
+            return loads(string[string.index("=") + 1:string.rfind(";")])
 
     SERIALIZERS['js'] = JavaScriptSerializer
+
 
 class PreambleEntryEpiloqueSerializer(object):
     @classmethod
@@ -95,29 +103,25 @@ class PreambleEntryEpiloqueSerializer(object):
             (cls.PREAMBLE % map_name) + "".join([
                 cls.ENTRY % item
                 for item
-                in items.iteritems()
-                ]) +
-            cls.EPILOQUE
-            )
+                in items.iteritems()]) +
+            cls.EPILOQUE)
+
 
 class SassSerializer(PreambleEntryEpiloqueSerializer):
     PREAMBLE = (
     '@mixin %s($directive, $path) {\n'
-    '         @'
-    )
+    '         @')
 
     ENTRY = (
     'if $path == "%s" { #{$directive}: url("%s"); }\n'
-    '    @else '
-    )
+    '    @else ')
 
     EPILOQUE = (
     '{\n'
     '      @warn "Did not find "#{$path}" in list of assets";\n'
     '      #{$directive}: url($path);\n'
     '    }\n'
-    '}'
-    )
+    '}')
 
     @classmethod
     def deserialize(cls, string):
@@ -128,6 +132,7 @@ class SassSerializer(PreambleEntryEpiloqueSerializer):
         return map
 
 SERIALIZERS['scss'] = SassSerializer
+
 
 class PHPSerializer(PreambleEntryEpiloqueSerializer):
     PREAMBLE = '$%s = array(\n'
@@ -143,6 +148,7 @@ class PHPSerializer(PreambleEntryEpiloqueSerializer):
         return map
 
 SERIALIZERS['php'] = PHPSerializer
+
 
 class SedSerializer(object):
     '''
@@ -160,7 +166,8 @@ class SedSerializer(object):
     @classmethod
     def _escape_filename(cls, filename, reverse=False):
         for key, value in cls.REPLACEMENTS.iteritems():
-            if reverse: key, value = value, key
+            if reverse:
+                key, value = value, key
             filename = filename.replace(key, value)
         return filename
 
@@ -170,8 +177,7 @@ class SedSerializer(object):
             (cls.ENTRY % (cls._escape_filename(key),
                 cls._escape_filename(value)))
             for key, value
-            in items.iteritems()
-            ]) + '\n'
+            in items.iteritems()]) + '\n'
 
     @classmethod
     def deserialize(cls, string):
@@ -188,6 +194,7 @@ class SedSerializer(object):
 
 SERIALIZERS['sed'] = SedSerializer
 
+
 class AssetHasher(object):
     HASHFUNS = {
         'md5': md5,
@@ -195,11 +202,11 @@ class AssetHasher(object):
     }
 
     def __init__(self, files, output_dir, map_filename, map_name, map_type,
-            digestlength=9999, # don't truncate
+            digestlength=9999,  # don't truncate
             hashfun='sha1',
             ):
 
-        self._hash_map = {} # actually, a map for hashes
+        self._hash_map = {}  # actually, a map for hashes
 
         if not map_type and map_filename:
             map_type = splitext(map_filename)[1].lstrip(".")
@@ -219,7 +226,9 @@ class AssetHasher(object):
         self.hashfun = self.HASHFUNS[hashfun]
 
     def digest(self, content):
-        return urlsafe_b64encode(self.hashfun(content).digest()).strip("=")[:self.digestlength]
+        return urlsafe_b64encode(
+                  self.hashfun(content).digest()).strip("=")\
+                          [:self.digestlength]
 
     def process_file(self, filename):
         # hash the file
@@ -278,7 +287,7 @@ class AssetHasher(object):
                 map[filename] = hashed_filename, mtime
             except OSError, e:
                 assert 2 == e.errno
-                pass # file does not exists, so ignore
+                pass  # file does not exists, so ignore
 
         self._hash_map = map
 
@@ -289,8 +298,7 @@ class AssetHasher(object):
         items = dict(
                   (filename, hashed_filename_mtime[0])
                   for filename, hashed_filename_mtime
-                  in self._hash_map.iteritems()
-                )
+                  in self._hash_map.iteritems())
 
         serialized = SERIALIZERS[self.map_type].serialize(items, self.map_name)
 
@@ -301,6 +309,7 @@ class AssetHasher(object):
         self.read_map()
         self.process_all_files()
         self.write_map()
+
 
 def main(args=None):
     if args == None:
@@ -319,7 +328,7 @@ def main(args=None):
       "--verbose",
       action="count",
       dest="verbosity",
-      help="increase verbosity level"
+      help="increase verbosity level",
     )
 
     parser.add_option(
@@ -328,8 +337,9 @@ def main(args=None):
       action="store_const",
       const=0,
       dest="verbosity",
-      help="don't print status messages to stdout"
+      help="don't print status messages to stdout",
     )
+
     parser.add_option(
       "-n",
       "--map-name",
@@ -345,7 +355,9 @@ def main(args=None):
       "--map-type",
       choices=SERIALIZERS.keys(),
       dest="map_type",
-      help="type of the map. one of " + ", ".join(SERIALIZERS.keys()) + " [default: guessed from MAPFILE]",
+      help=("type of the map. one of "
+          + ", ".join(SERIALIZERS.keys())
+          + " [default: guessed from MAPFILE]"),
       metavar="MAPTYPE",
       type="choice",
     )
@@ -355,17 +367,21 @@ def main(args=None):
       "--digest-length",
       default=27,
       dest="digestlength",
-      help="length of the generated filenames (without extension) [default: %default]",
+      help=("length of the generated filenames "
+            "(without extension) [default: %default]"),
       metavar="LENGTH",
       type="int",
     )
+
     parser.add_option(
       "-d",
       "--digest",
       choices=AssetHasher.HASHFUNS.keys(),
       default='sha1',
       dest="hashfun",
-      help="hash function to use. One of " + ", ".join(AssetHasher.HASHFUNS.keys()) + " [default: %default]",
+      help="hash function to use. One of "
+         + ", ".join(AssetHasher.HASHFUNS.keys())
+         + " [default: %default]",
       metavar="HASHFUN",
       type="choice",
     )
