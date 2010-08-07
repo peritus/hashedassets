@@ -4,9 +4,10 @@ from base64 import urlsafe_b64encode
 import logging
 from glob import glob
 from optparse import OptionParser
-from os import remove, mkdir, walk, stat
+from os import remove, mkdir, walk, stat, makedirs
 from os.path import getmtime, join, exists, isdir, relpath, \
-                    splitext, normpath, dirname, commonprefix
+                    splitext, normpath, dirname, commonprefix, \
+                    split as path_split
 from re import split as re_split
 from shutil import copy2
 from signal import signal, SIGTERM, SIGHUP
@@ -200,12 +201,14 @@ SERIALIZERS['sed'] = SedSerializer
 
 
 class AssetHasher(object):
+
     HASHFUNS = {
         'md5': md5,
         'sha1': sha1,
     }
 
     def __init__(self, files, output_dir, map_filename, map_name, map_type,
+            keep_dirs=False,
             digestlength=9999,  # don't truncate
             hashfun='sha1',
             ):
@@ -223,29 +226,34 @@ class AssetHasher(object):
         self.input_dir = dirname(commonprefix(files))
 
         self.digestlength = digestlength
+        self.keep_dirs = keep_dirs
 
         if hashfun == None:
             hashfun = 'sha1'
 
         self.hashfun = self.HASHFUNS[hashfun]
 
-    def digest(self, content):
-        return urlsafe_b64encode(
-                  self.hashfun(content).digest()).strip("=")\
-                          [:self.digestlength]
-
-    def process_file(self, filename):
-        # hash the file
+    def digest(self, fun, filename):
         _, extension = splitext(filename)
 
-        hashed_filename = self.digest(open(filename).read())
+        hashed_filename = urlsafe_b64encode(
+                fun(open(filename).read()).digest()).strip("=")\
+                        [:self.digestlength]
 
         if extension:
             hashed_filename = "%s%s" % (hashed_filename, extension)
 
-        mtime = getmtime(filename)
-        hashed_filename = join(self.output_dir, hashed_filename)
+        extra_dirs = ''
 
+        if self.keep_dirs:
+            extra_dirs, _ = path_split(relpath(filename, self.input_dir))
+
+        return join(self.output_dir, extra_dirs, hashed_filename)
+
+    def process_file(self, filename):
+        hashed_filename = self.digest(self.hashfun, filename)
+
+        mtime = getmtime(filename)
         map_key = relpath(filename, self.input_dir)
         map_value = relpath(hashed_filename, self.output_dir)
 
@@ -264,9 +272,22 @@ class AssetHasher(object):
         if map_key in self._hash_map:
             return
 
-        # actually copy the file
         self._hash_map[map_key] = (map_value, mtime)
-        copy2(filename, hashed_filename)
+
+        try:
+            copy2(filename, hashed_filename)
+        except IOError, e:
+            if not e.strerror == 'No such file or directory':
+                raise
+
+            # create parent dirs that are needed for the output file
+            logger.debug(hashed_filename)
+            create_dir, _ = path_split(hashed_filename)
+            logger.info("mkdir -p %s" % create_dir)
+            makedirs(create_dir)
+
+            copy2(filename, hashed_filename)
+
         logger.info("cp '%s' '%s'", filename, hashed_filename)
 
     def process_all_files(self):
@@ -389,6 +410,15 @@ def main(args=None):
       type="choice",
     )
 
+    parser.add_option(
+      "-k",
+      "--keep-dirs",
+      action="store_true",
+      dest="keep_dirs",
+      default=False,
+      help="Mirror SOURCE dir structure to DEST [default: false]",
+    )
+
     (options, args) = parser.parse_args(args)
 
     if options.verbosity == None:
@@ -427,6 +457,7 @@ def main(args=None):
       map_type=options.map_type,
       digestlength=options.digestlength,
       hashfun=options.hashfun,
+      keep_dirs=options.keep_dirs,
     ).run()
 
 if __name__ == '__main__':

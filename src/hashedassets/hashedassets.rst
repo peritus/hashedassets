@@ -199,6 +199,19 @@ cp 'input/subdir/bar.txt' 'output/N7UdGUp1E-RbVvZSTy1R8g.txt'
 
 >>> system("rm output/rL0Y20zC-Fzt72VPzMSk2A.txt output/N7UdGUp1E-RbVvZSTy1R8g.txt")
 
+
+Keep the directory structure with --keep-dirs
++++++++++++++++++++++++++++++++++++++++++++++
+
+By default hashedassets copies all output files into the root level of the output dir. You can turn this off, with the --keep-dirs option:
+
+>>> system("hashedassets --keep-dirs maps/preserve.json input/*.txt input/*/*.txt output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+mkdir -p output/subdir
+cp 'input/subdir/bar.txt' 'output/subdir/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> system("rm -r output/subdir/")
+
 Re-using a map
 ++++++++++++++
 
