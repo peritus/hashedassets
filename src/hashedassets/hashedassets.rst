@@ -223,8 +223,21 @@ cp 'input/subdir/bar.txt' 'output/subdir/bar.txt'
   "subdir/bar.txt": "subdir/bar.txt"
 }
 
+If you switch --identity off, all identity files get deleted:
 
->>> system("rm -r output/foo.txt output/subdir/")
+>>> system("hashedassets maps/identitymap.json input/*.txt input/*/*.txt output/")
+rm 'output/foo.txt'
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+rm 'output/subdir/bar.txt'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> print open('maps/identitymap.json').read()
+{
+  "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
+  "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
+}
+
+>>> system("rm -r output/subdir/")
 
 Verbose mode with -v
 ++++++++++++++++++++
