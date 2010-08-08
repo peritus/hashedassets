@@ -332,8 +332,9 @@ class AssetHasher(object):
 
         serialized = SERIALIZERS[self.map_type].serialize(items, self.map_name)
 
-        with open(self.map_filename, "w") as f:
-            f.write(serialized)
+        f = open(self.map_filename, "w")
+        f.write(serialized)
+        f.close()
 
     def run(self):
         self.read_map()
