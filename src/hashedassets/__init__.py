@@ -15,15 +15,13 @@ from base64 import urlsafe_b64encode
 import logging
 from glob import glob
 from optparse import OptionParser
-from os import remove, mkdir, walk, stat, makedirs
+from os import remove, mkdir, makedirs
 from os.path import getmtime, join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix, \
                     split as path_split
 from re import split as re_split
 from shutil import copy2
-from signal import signal, SIGTERM, SIGHUP
 import sys
-from time import sleep
 from itertools import chain
 
 try:
