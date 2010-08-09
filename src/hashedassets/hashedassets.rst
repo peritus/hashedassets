@@ -249,7 +249,6 @@ If we tell the command to be quiet, it does not print what it is doing:
 If we tell the command to be more verbose, it logs more information:
 
 >>> system("hashedassets -vvv maps/map3.txt input/*.txt input/*/*.txt output/")
-Debug level set to 10
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -322,7 +321,6 @@ cp 'input/foo.txt' 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 Even after the command is invoked a second time:
 
 >>> system("hashedassets -vv maps/samedir.json input/*.txt input/")
-Debug level set to 10
 Won't copy 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt' to itself.
 
 Error handling

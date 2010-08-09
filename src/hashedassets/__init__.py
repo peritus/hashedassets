@@ -459,7 +459,6 @@ def main(args=None):
         2: logging.DEBUG,
     }.get(options.verbosity, logging.DEBUG)
     logger.setLevel(log_level)
-    logger.debug("Debug level set to %d", log_level)
 
     if len(args) < 3:
         parser.error("You need to specify at least MAPFILE SOURCE and DEST")
