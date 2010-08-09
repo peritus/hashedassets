@@ -311,6 +311,20 @@ isn't recreated:
 >>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
+Using one directory as SOURCE and DEST
+++++++++++++++++++++++++++++++++++++++
+
+This works as well:
+
+>>> system("hashedassets maps/samedir.json input/*.txt input/")
+cp 'input/foo.txt' 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
+
+Even after the command is invoked a second time:
+
+>>> system("hashedassets -vv maps/samedir.json input/*.txt input/")
+Debug level set to 10
+Won't copy 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt' to itself.
+
 Error handling
 --------------
 

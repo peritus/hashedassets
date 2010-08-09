@@ -20,7 +20,7 @@ from os.path import getmtime, join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix, \
                     split as path_split
 from re import split as re_split
-from shutil import copy2
+from shutil import copy2, Error as shutil_Error
 import sys
 from itertools import chain
 
@@ -282,6 +282,12 @@ class AssetHasher(object):
 
         try:
             copy2(filename, hashed_filename)
+        except shutil_Error, e:
+            if e.args[0].endswith("are the same file"):
+                logger.debug("Won't copy '%s' to itself.", filename)
+                return
+            else:
+                raise
         except IOError, e:
             if not e.strerror == 'No such file or directory':
                 raise
@@ -292,6 +298,7 @@ class AssetHasher(object):
             logger.info("mkdir -p %s" % create_dir)
             makedirs(create_dir)
 
+            # try again
             copy2(filename, hashed_filename)
 
         logger.info("cp '%s' '%s'", filename, hashed_filename)
