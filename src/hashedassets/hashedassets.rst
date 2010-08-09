@@ -315,13 +315,25 @@ Using one directory as SOURCE and DEST
 
 This works as well:
 
->>> system("hashedassets maps/samedir.json input/*.txt input/")
+>>> system("hashedassets -vvvv maps/samedir.json input/*.txt input/")
 cp 'input/foo.txt' 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 Even after the command is invoked a second time:
 
->>> system("hashedassets -vv maps/samedir.json input/*.txt input/")
+>>> system("hashedassets -vvv maps/samedir.json input/*.txt input/")
 Won't copy 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt' to itself.
+
+Notice, that the mapfile does not contain the self-reference:
+
+>>> print open("maps/samedir.json").read()
+{
+  "foo.txt": "NdbmnXyjdY2paFzlDw9aJzCKH9w.txt"
+}
+
+>>> write("input/foo.txt", "barbarbar")
+>>> system("hashedassets -vv maps/samedir.json input/*.txt input/")
+rm 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
+cp 'input/foo.txt' 'input/sWL19addVG2KRYJ02EDKXF4Oh8s.txt'
 
 Error handling
 --------------

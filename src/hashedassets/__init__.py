@@ -257,7 +257,10 @@ class AssetHasher(object):
         return join(self.output_dir, extra_dirs, hashed_filename)
 
     def process_file(self, filename):
-        hashed_filename = self.digest(self.hashfun, filename)
+        try:
+            hashed_filename = self.digest(self.hashfun, filename)
+        except IOError, e:
+            return  # files does not exist, can't be hashed
 
         mtime = getmtime(filename)
         map_key = relpath(filename, self.input_dir)
@@ -277,8 +280,6 @@ class AssetHasher(object):
         # no work to do
         if map_key in self._hash_map:
             return
-
-        self._hash_map[map_key] = (map_value, mtime)
 
         try:
             copy2(filename, hashed_filename)
@@ -300,6 +301,8 @@ class AssetHasher(object):
 
             # try again
             copy2(filename, hashed_filename)
+
+        self._hash_map[map_key] = (map_value, mtime)
 
         logger.info("cp '%s' '%s'", filename, hashed_filename)
 
