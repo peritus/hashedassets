@@ -218,9 +218,6 @@ class AssetHasher(object):
 
         self._hash_map = {}  # actually, a map for hashes
 
-        if not map_type and map_filename:
-            map_type = splitext(map_filename)[1].lstrip(".")
-
         self.output_dir = output_dir
         self.map_filename = map_filename
         self.map_name = map_name
@@ -469,6 +466,12 @@ def main(args=None):
     map_filename = args[0]
     files = args[1:-1]
     output_dir = normpath(args[-1])
+
+    if not options.map_type and map_filename:
+        options.map_type = splitext(map_filename)[1].lstrip(".")
+
+    if not options.map_type in SERIALIZERS.keys():
+        parser.error("Invalid map type: '%s'" % options.map_type)
 
     if not exists(output_dir):
         mkdir(output_dir)

@@ -35,3 +35,14 @@ Options:
   -k, --keep-dirs       Mirror SOURCE dir structure to DEST [default: false]
   -i, --identity        Don't actually map, keep all file names
 
+Generating maps with unguessable and unspecified types throw errors:
+
+>>> system("hashedassets unguessable doesnot matter", external=True)
+Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
+<BLANKLINE>
+hashedassets: error: Invalid map type: ''
+
+>>> system("hashedassets unguessable.withextension doesnot matter", external=True)
+Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
+<BLANKLINE>
+hashedassets: error: Invalid map type: 'withextension'
