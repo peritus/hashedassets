@@ -46,9 +46,13 @@ def test_globs():
 def test_suite():
     setUp()
 
-    return unittest.TestSuite(
+    return unittest.TestSuite([
         doctest.DocFileSuite(
             'hashedassets.rst',
             globs=test_globs(),
             optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS|doctest.REPORT_UDIFF),
-    )
+        doctest.DocFileSuite(
+            'errors.rst',
+            globs=test_globs(),
+            optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS|doctest.REPORT_UDIFF),
+    ])
