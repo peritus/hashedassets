@@ -16,7 +16,7 @@ import logging
 from glob import glob
 from optparse import OptionParser
 from os import remove, mkdir, makedirs
-from os.path import getmtime, join, exists, isdir, relpath, \
+from os.path import join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix, \
                     split as path_split
 from re import split as re_split
@@ -259,24 +259,27 @@ class AssetHasher(object):
         except IOError, e:
             return  # files does not exist, can't be hashed
 
-        mtime = getmtime(filename)
         map_key = relpath(filename, self.input_dir)
         map_value = relpath(hashed_filename, self.output_dir)
 
+
+        # processed in previous run
         if map_key in self._hash_map:
-            old_hashed_filename, _ = self._hash_map[map_key]
-            old_hashed_filename = join(self.output_dir, old_hashed_filename)
+            old_hashed_filename = join(self.output_dir, self._hash_map[map_key])
 
-            if(hashed_filename == old_hashed_filename):
-                return
+            # still the same, don't touch
+            if hashed_filename == old_hashed_filename:
+                if exists(old_hashed_filename):
+                    return
 
-            remove(old_hashed_filename)
-            logger.info("rm '%s'", old_hashed_filename)
-            del self._hash_map[map_key]
+            # not the same, remove dangling file
+            try:
+                remove(old_hashed_filename)
+                logger.info("rm '%s'", old_hashed_filename)
+                del self._hash_map[map_key]
+            except IOError, e:
+                pass
 
-        # no work to do
-        if map_key in self._hash_map:
-            return
 
         try:
             copy2(filename, hashed_filename)
@@ -299,7 +302,7 @@ class AssetHasher(object):
             # try again
             copy2(filename, hashed_filename)
 
-        self._hash_map[map_key] = (map_value, mtime)
+        self._hash_map[map_key] = map_value
 
         logger.info("cp '%s' '%s'", filename, hashed_filename)
 
@@ -318,26 +321,14 @@ class AssetHasher(object):
 
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
-        result = {}
         for filename, hashed_filename in deserialized.iteritems():
-            try:
-                mtime = getmtime(join(self.output_dir, hashed_filename))
-                result[filename] = hashed_filename, mtime
-            except OSError, e:
-                assert 2 == e.errno  # file does not exists, so ignore
-
-        self._hash_map = result
+            self._hash_map[filename] = hashed_filename
 
     def write_map(self):
         if not self.map_filename:
             return
 
-        items = dict(
-                  (filename, hashed_filename_mtime[0])
-                  for filename, hashed_filename_mtime
-                  in self._hash_map.iteritems())
-
-        serialized = SERIALIZERS[self.map_type].serialize(items, self.map_name)
+        serialized = SERIALIZERS[self.map_type].serialize(self._hash_map, self.map_name)
 
         f = open(self.map_filename, "w")
         f.write(serialized)

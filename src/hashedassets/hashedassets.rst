@@ -182,7 +182,7 @@ Hashedassets uses sha1 by default to hash the input files. You can change that
 with the -d command line parameter, e.g. by specifying -d md5 to use the md5
 digest method.
 
->>> system("hashedassets -d md5 maps/shortmap.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -d md5 maps/md5map.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/rL0Y20zC-Fzt72VPzMSk2A.txt'
 cp 'input/subdir/bar.txt' 'output/N7UdGUp1E-RbVvZSTy1R8g.txt'
 
