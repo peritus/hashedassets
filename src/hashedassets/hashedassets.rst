@@ -31,8 +31,8 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 map.txt
 
 >>> print open("maps/map.txt").read()
-subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
+subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 <BLANKLINE>
 
 >>> system("ls output/")
@@ -62,8 +62,8 @@ cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
 >>> print open("maps/map.sed").read()
-s/subdir\/bar\.txt/Ys23Ag_5IOWqZCw9QGaVDdHwH00\.txt/g
 s/foo\.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM\.txt/g
+s/subdir\/bar\.txt/Ys23Ag_5IOWqZCw9QGaVDdHwH00\.txt/g
 <BLANKLINE>
 
 We should be able to use this with sed on this file:
@@ -131,8 +131,8 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
 >>> print open("maps/map.scss").read()
 @mixin my_callback($directive, $path) {
-         @if $path == "subdir/bar.txt" { #{$directive}: url("Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"); }
-    @else if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
+         @if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
+    @else if $path == "subdir/bar.txt" { #{$directive}: url("Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"); }
     @else {
       @warn "Did not find "#{$path}" in list of assets";
       #{$directive}: url($path);
@@ -148,8 +148,8 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
 >>> print open("maps/map.php").read()
 $my_callback = array(
-  "subdir/bar.txt" => "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt",
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
+  "subdir/bar.txt" => "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt",
 )
 
 
@@ -225,7 +225,7 @@ cp 'input/subdir/bar.txt' 'output/subdir/bar.txt'
 
 If you switch --identity off, all identity files get deleted:
 
->>> system("hashedassets maps/identitymap.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/identitymap.json input/*.txt input/*/*.txt output/")
 rm 'output/foo.txt'
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 rm 'output/subdir/bar.txt'
@@ -248,7 +248,7 @@ If we tell the command to be quiet, it does not print what it is doing:
 
 If we tell the command to be more verbose, it logs more information:
 
->>> system("hashedassets -vvv maps/map3.txt input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map3.txt input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -315,13 +315,12 @@ Using one directory as SOURCE and DEST
 
 This works as well:
 
->>> system("hashedassets -vvvv maps/samedir.json input/*.txt input/")
+>>> system("hashedassets -v maps/samedir.json input/*.txt input/")
 cp 'input/foo.txt' 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 Even after the command is invoked a second time:
 
->>> system("hashedassets -vvv maps/samedir.json input/*.txt input/")
-Won't copy 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt' to itself.
+>>> system("hashedassets maps/samedir.json input/*.txt input/")
 
 Notice, that the mapfile does not contain the self-reference:
 
@@ -331,7 +330,7 @@ Notice, that the mapfile does not contain the self-reference:
 }
 
 >>> write("input/foo.txt", "barbarbar")
->>> system("hashedassets -vv maps/samedir.json input/*.txt input/")
+>>> system("hashedassets -v maps/samedir.json input/*.txt input/")
 rm 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 cp 'input/foo.txt' 'input/sWL19addVG2KRYJ02EDKXF4Oh8s.txt'
 

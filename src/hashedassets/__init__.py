@@ -30,6 +30,14 @@ except ImportError:
     from sha import sha as sha1    # Python 2.4
     from md5 import md5
 
+try:
+    from collections import OrderedDict  # Python 2.7
+except ImportError:
+    try:
+        from odict import odict as OrderedDict  # Python 2.6
+    except ImportError:
+        pass
+
 logger = logging.getLogger("hashedassets")
 
 __version__ = 0, 2, '2dev0'
@@ -216,15 +224,18 @@ class AssetHasher(object):
             hashfun='sha1',
             ):
 
-        self._hash_map = {}  # actually, a map for hashes
+        self.input_dir = dirname(commonprefix(files))
+
+        self.files = OrderedDict.fromkeys(  # python is lisp!
+                         map(lambda l: relpath(l, self.input_dir),
+                             chain.from_iterable(map(glob, files))))
+
+        logger.debug("Initialized map, is now %s", self.files)
 
         self.output_dir = output_dir
         self.map_filename = map_filename
         self.map_name = map_name
         self.map_type = map_type
-        self.files = chain.from_iterable([glob(path) for path in files])
-        self.input_dir = dirname(commonprefix(files))
-
         self.digestlength = digestlength
         self.keep_dirs = keep_dirs
 
@@ -241,7 +252,7 @@ class AssetHasher(object):
         else:
             fun = {'md5': md5, 'sha1': sha1}[fun]
             hashed_filename = urlsafe_b64encode(
-                    fun(open(filename).read()).digest()).strip("=")\
+                    fun(open(join(self.input_dir, filename)).read()).digest()).strip("=")\
                             [:self.digestlength]
             if extension:
                 hashed_filename = "%s%s" % (hashed_filename, extension)
@@ -249,40 +260,42 @@ class AssetHasher(object):
         extra_dirs = ''
 
         if self.keep_dirs:
-            extra_dirs, _ = path_split(relpath(filename, self.input_dir))
+            extra_dirs, _ = path_split(filename)
 
-        return join(self.output_dir, extra_dirs, hashed_filename)
+        return join(extra_dirs, hashed_filename)
 
     def process_file(self, filename):
+        logger.debug("Processing file '%s'", filename)
+
         try:
             hashed_filename = self.digest(self.hashfun, filename)
         except IOError, e:
-            return  # files does not exist, can't be hashed
+            logger.debug("'%s' does not exist, can't be hashed", filename)
+            return
 
-        map_key = relpath(filename, self.input_dir)
-        map_value = relpath(hashed_filename, self.output_dir)
+        logger.debug("Determined new hashed filename: '%s'", hashed_filename)
 
+        if self.files[filename]:
+            logger.debug("File has been processed in a previous run (was '%s' then)",
+                    self.files[filename])
 
-        # processed in previous run
-        if map_key in self._hash_map:
-            old_hashed_filename = join(self.output_dir, self._hash_map[map_key])
+            outfile = join(self.output_dir, self.files[filename])
 
-            # still the same, don't touch
-            if hashed_filename == old_hashed_filename:
-                if exists(old_hashed_filename):
+            if exists(outfile):
+                logger.debug("%s still exists", outfile)
+
+                if hashed_filename == self.files[filename]:
+                    # skip file
+                    logger.debug("Skipping file '%s' -> '%s'", filename, self.files[filename])
                     return
 
-            # not the same, remove dangling file
-            try:
-                remove(old_hashed_filename)
-                logger.info("rm '%s'", old_hashed_filename)
-                del self._hash_map[map_key]
-            except IOError, e:
-                pass
-
+                # remove dangling file
+                remove(outfile)
+                logger.info("rm '%s'", outfile)
 
         try:
-            copy2(filename, hashed_filename)
+            copy2(join(self.input_dir, filename), join(self.output_dir,
+                hashed_filename))
         except shutil_Error, e:
             if e.args[0].endswith("are the same file"):
                 logger.debug("Won't copy '%s' to itself.", filename)
@@ -296,15 +309,17 @@ class AssetHasher(object):
             # create parent dirs that are needed for the output file
             logger.debug(hashed_filename)
             create_dir, _ = path_split(hashed_filename)
-            logger.info("mkdir -p %s" % create_dir)
-            makedirs(create_dir)
+            logger.info("mkdir -p %s" % join(self.output_dir, create_dir))
+            makedirs(join(self.output_dir, create_dir))
 
             # try again
-            copy2(filename, hashed_filename)
+            copy2(join(self.input_dir, filename), join(self.output_dir,
+                hashed_filename))
 
-        self._hash_map[map_key] = map_value
+        self.files[filename] = hashed_filename
 
-        logger.info("cp '%s' '%s'", filename, hashed_filename)
+        logger.info("cp '%s' '%s'", join(self.input_dir, filename),
+                join(self.output_dir, hashed_filename))
 
     def process_all_files(self):
         for f in self.files:
@@ -322,13 +337,17 @@ class AssetHasher(object):
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
         for filename, hashed_filename in deserialized.iteritems():
-            self._hash_map[filename] = hashed_filename
+            self.files[filename] = hashed_filename
+
+        logger.debug("Read map, is now: %s", self.files)
 
     def write_map(self):
         if not self.map_filename:
             return
 
-        serialized = SERIALIZERS[self.map_type].serialize(self._hash_map, self.map_name)
+        serialized = SERIALIZERS[self.map_type].serialize(OrderedDict(
+            (k,v) for k, v in self.files.iteritems() if v != None
+            ), self.map_name)
 
         f = open(self.map_filename, "w")
         f.write(serialized)

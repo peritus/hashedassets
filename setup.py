@@ -17,6 +17,15 @@ long_description=(
 
 name='hashedassets'
 
+install_requires=[
+      'setuptools',
+    ]
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    install_requires.append("odict==1.3.2")
+
 setup(
     name=name,
     version = ".".join(str(n) for n in hashedassets.__version__),
@@ -30,9 +39,7 @@ setup(
     package_dir={'': 'src'},
     namespace_packages=[],
     include_package_data = True,
-    install_requires=[
-      'setuptools',
-    ],
+    install_requires=install_requires,
     zip_safe = False,
     extras_require = dict(
         test=[
