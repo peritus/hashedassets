@@ -31,10 +31,12 @@ except ImportError:
     from md5 import md5
 
 try:
-    from collections import OrderedDict  # Python 2.7
+    # Python 2.7
+    from collections import OrderedDict  # pylint: disable=E0611
 except ImportError:
     try:
-        from odict import odict as OrderedDict  # Python 2.6
+        # Python 2.6
+        from odict import odict as OrderedDict
     except ImportError:
         pass
 
