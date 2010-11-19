@@ -323,8 +323,8 @@ isn't recreated:
 >>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
-Using one directory as SOURCE and DEST
-++++++++++++++++++++++++++++++++++++++
+Using the same directory for SOURCE and DEST
+++++++++++++++++++++++++++++++++++++++++++++
 
 This works as well:
 
