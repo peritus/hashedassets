@@ -203,6 +203,19 @@ cp 'input/subdir/2nd/baz.txt' 'output/subdir/2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
 
 >>> system("rm -r output/subdir/")
 
+Don't move anything with --map-only
++++++++++++++++++++++++++++++++++++
+
+If you specify ''--map-only'', the program will create a map but it won't move
+any files. This is useful, if you want to use the hashed name as part of the
+path ('''http://static.example.com/aYs23A/subdir/bar.txt''') that is dropped by
+the webserver during url rewriting.
+
+>>> system("hashedassets --map-only maps/maponly.txt input/*.txt")
+>>> print open('maps/maponly.txt').read()
+foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
+<BLANKLINE>
+
 Don't map anything with --identity
 ++++++++++++++++++++++++++++++++++
 

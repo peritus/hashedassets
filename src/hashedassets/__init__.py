@@ -18,7 +18,7 @@ from optparse import OptionParser
 from os import remove, mkdir, makedirs
 from os.path import join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix, \
-                    split as path_split
+                    split as path_split, samefile
 from re import split as re_split
 from shutil import copy2, Error as shutil_Error
 import sys
@@ -222,6 +222,7 @@ SERIALIZERS['sed'] = SedSerializer
 class AssetHasher(object):
     def __init__(self, files, output_dir, map_filename, map_name, map_type,
             keep_dirs=False,
+            map_only=False,
             digestlength=9999,  # don't truncate
             hashfun='sha1',
             ):
@@ -238,6 +239,7 @@ class AssetHasher(object):
         self.map_filename = map_filename
         self.map_name = map_name
         self.map_type = map_type
+        self.map_only = map_only
         self.digestlength = digestlength
         self.keep_dirs = keep_dirs
 
@@ -292,18 +294,26 @@ class AssetHasher(object):
                     return
 
                 # remove dangling file
-                remove(outfile)
-                logger.info("rm '%s'", outfile)
+                if not self.map_only:
+                    remove(outfile)
+                    logger.info("rm '%s'", outfile)
+
+
+        infile = join(self.input_dir, filename)
+        outfile = join(self.output_dir, hashed_filename)
 
         try:
-            copy2(join(self.input_dir, filename), join(self.output_dir,
-                hashed_filename))
-        except shutil_Error, e:
-            if e.args[0].endswith("are the same file"):
-                logger.debug("Won't copy '%s' to itself.", filename)
-                return
-            else:
+            if samefile(infile, outfile):
+               logger.debug("Won't copy '%s' to itself.", filename)
+               return
+        except OSError, e:
+            if not (e.strerror == 'No such file or directory' and e.filename == outfile):
+                assert False,  (dir(e), e.message, e.errno, e.strerror, e.filename)
                 raise
+
+        try:
+            if not self.map_only:
+                copy2(infile, outfile)
         except IOError, e:
             if not e.strerror == 'No such file or directory':
                 raise
@@ -320,7 +330,10 @@ class AssetHasher(object):
 
         self.files[filename] = hashed_filename
 
-        logger.info("cp '%s' '%s'", join(self.input_dir, filename),
+        if not self.map_only:
+            logger.info(
+                "cp '%s' '%s'",
+                join(self.input_dir, filename),
                 join(self.output_dir, hashed_filename))
 
     def process_all_files(self):
@@ -359,7 +372,6 @@ class AssetHasher(object):
         self.read_map()
         self.process_all_files()
         self.write_map()
-
 
 def main(args=None):
     if args == None:
@@ -452,6 +464,15 @@ def main(args=None):
       help="Don't actually map, keep all file names",
     )
 
+    parser.add_option(
+      "-o",
+      "--map-only",
+      action="store_true",
+      dest="map_only",
+      default=False,
+      help="Don't move files, only generate a map",
+    )
+
     (options, args) = parser.parse_args(args)
 
     if options.identity:
@@ -472,12 +493,14 @@ def main(args=None):
     }.get(options.verbosity, logging.DEBUG)
     logger.setLevel(log_level)
 
-    if len(args) < 3:
-        parser.error("You need to specify at least MAPFILE SOURCE and DEST")
+    if len(args) < 2 and options.map_only:
+        print args
+        parser.error("In --map-only mode, you need to specify at least MAPFILE and SOURCE")
+
+    if len(args) < 3 and not options.map_only:
+        parser.error("You need to specify at least MAPFILE, SOURCE and DEST")
 
     map_filename = args[0]
-    files = args[1:-1]
-    output_dir = normpath(args[-1])
 
     if not options.map_type and map_filename:
         options.map_type = splitext(map_filename)[1].lstrip(".")
@@ -485,11 +508,17 @@ def main(args=None):
     if not options.map_type in SERIALIZERS.keys():
         parser.error("Invalid map type: '%s'" % options.map_type)
 
-    if not exists(output_dir):
-        mkdir(output_dir)
-        logger.info("mkdir '%s'", output_dir)
-    elif not isdir(output_dir):
-        parser.error("Output dir at '%s' is not a directory" % output_dir)
+    if options.map_only:
+        files = args[1:]
+        output_dir = '.'
+    else:
+        files = args[1:-1]
+        output_dir = normpath(args[-1])
+        if not exists(output_dir):
+            mkdir(output_dir)
+            logger.info("mkdir '%s'", output_dir)
+        elif not isdir(output_dir):
+            parser.error("Output dir at '%s' is not a directory" % output_dir)
 
     AssetHasher(
       files=files,
@@ -497,6 +526,7 @@ def main(args=None):
       map_filename=map_filename,
       map_name=options.map_name,
       map_type=options.map_type,
+      map_only=options.map_only,
       digestlength=options.digestlength,
       hashfun=options.hashfun,
       keep_dirs=options.keep_dirs,

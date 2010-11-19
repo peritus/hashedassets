@@ -34,6 +34,7 @@ Options:
                         [default: sha1]
   -k, --keep-dirs       Mirror SOURCE dir structure to DEST [default: false]
   -i, --identity        Don't actually map, keep all file names
+  -o, --map-only        Don't move files, only generate a map
 
 Generating maps with unguessable and unspecified types throw errors:
 
