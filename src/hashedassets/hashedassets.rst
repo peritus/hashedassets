@@ -252,6 +252,25 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
 >>> system("rm -r output/subdir/")
 
+Strip file extensions with --strip-extensions
++++++++++++++++++++++++++++++++++++++++++++++
+
+If you want to strip the file extensions of the resulting hashed files, this
+option is for you! This is particularly useful in combination with the
+''--map-only'' option with the hashed name becoming part of the path of the url.
+
+>>> system("hashedassets --strip-extensions maps/noextensions.json input/*.txt input/*/*.txt output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00'
+
+>>> print open('maps/noextensions.json').read()
+{
+  "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM",
+  "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00"
+}
+
+>>> system("rm -r output/C-7Hteo_D9vJXQ3UfzxbwnXaijM output/Ys23Ag_5IOWqZCw9QGaVDdHwH00")
+
 Verbose mode with -v
 ++++++++++++++++++++
 

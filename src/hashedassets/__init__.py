@@ -223,6 +223,7 @@ class AssetHasher(object):
     def __init__(self, files, output_dir, map_filename, map_name, map_type,
             keep_dirs=False,
             map_only=False,
+            strip_extensions=False,
             digestlength=9999,  # don't truncate
             hashfun='sha1',
             ):
@@ -240,6 +241,7 @@ class AssetHasher(object):
         self.map_name = map_name
         self.map_type = map_type
         self.map_only = map_only
+        self.strip_extensions = strip_extensions
         self.digestlength = digestlength
         self.keep_dirs = keep_dirs
 
@@ -258,7 +260,7 @@ class AssetHasher(object):
             hashed_filename = urlsafe_b64encode(
                     fun(open(join(self.input_dir, filename)).read()).digest()).strip("=")\
                             [:self.digestlength]
-            if extension:
+            if extension and not self.strip_extensions:
                 hashed_filename = "%s%s" % (hashed_filename, extension)
 
         extra_dirs = ''
@@ -473,6 +475,15 @@ def main(args=None):
       help="Don't move files, only generate a map",
     )
 
+    parser.add_option(
+      "-s",
+      "--strip-extensions",
+      action="store_true",
+      dest="strip_extensions",
+      default=False,
+      help="Strip the file extensions from the hashed files",
+    )
+
     (options, args) = parser.parse_args(args)
 
     if options.identity:
@@ -527,6 +538,7 @@ def main(args=None):
       map_name=options.map_name,
       map_type=options.map_type,
       map_only=options.map_only,
+      strip_extensions=options.strip_extensions,
       digestlength=options.digestlength,
       hashfun=options.hashfun,
       keep_dirs=options.keep_dirs,
