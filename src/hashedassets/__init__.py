@@ -278,7 +278,7 @@ class AssetHasher(object):
         logger.debug("Determined new hashed filename: '%s'", hashed_filename)
 
         if self.files[filename]:
-            logger.debug("File has been processed in a previous run (was '%s' then)",
+            logger.debug("File has been processed in a previous run (hashed to '%s' then)",
                     self.files[filename])
 
             outfile = join(self.output_dir, self.files[filename])
