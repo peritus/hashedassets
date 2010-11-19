@@ -7,7 +7,7 @@ least the mapfile, the source and the destination directory:
 >>> system("hashedassets", external=True)
 Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
 <BLANKLINE>
-hashedassets: error: You need to specify at least MAPFILE SOURCE and DEST
+hashedassets: error: You need to specify at least MAPFILE, SOURCE and DEST
 
 If the user specifies the --help option, detailed usage information is shown:
 
