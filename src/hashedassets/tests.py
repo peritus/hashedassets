@@ -47,6 +47,7 @@ def test_suite():
     setUp()
 
     return unittest.TestSuite([
+        doctest.DocTestSuite('hashedassets'),
         doctest.DocFileSuite(
             'hashedassets.rst',
             globs=test_globs(),
