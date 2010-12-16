@@ -1,9 +1,10 @@
 .installed.cfg
 bin/buildout
 bin/hashedassets
+bin/pylint
 bin/test
 develop-eggs/hashedassets.egg-link
 dist/
+parts/buildout/
 parts/test/
 src/hashedassets.egg-info/
-bin/pylint
