@@ -447,7 +447,7 @@ class AssetHasher(object):
         try:
             hashed_filename = self.digest(self.hashfun, filename)
         except IOError, e:
-            logger.debug("'%s' does not exist, can't be hashed", filename)
+            logger.debug("'%s' does not exist, can't be hashed", filename, exc_info=e)
             return
 
         logger.debug("Determined new hashed filename: '%s'", hashed_filename)
