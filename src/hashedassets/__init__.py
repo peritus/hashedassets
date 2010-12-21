@@ -18,7 +18,7 @@ from optparse import OptionParser
 from os import remove, mkdir, makedirs
 from os.path import join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix, \
-                    split as path_split, samefile
+                    split as path_split, samefile, abspath
 from re import split as re_split
 from shutil import copy2, Error as shutil_Error
 import sys
@@ -218,6 +218,170 @@ class SedSerializer(object):
 
 SERIALIZERS['sed'] = SedSerializer
 
+class AssetHashFormat(dict):
+
+    def __init__(self, relpath, input_dir=None):
+
+        self._relpath = relpath # path, relative to input_dir
+        self._input_dir = input_dir or '.'
+
+    def __repr__(self):
+        '''
+        >>> AssetHashFormat('foo/bar')
+        <AssetHashFormat('foo/bar')>
+        '''
+        return "<AssetHashFormat('%s')>" % self.format('%(relpath)s')
+
+    def __getitem__(self, key):
+        '''
+        >>> AssetHashFormat('path/file')['base64__complete_filename']
+        'ZmlsZQ'
+        >>> AssetHashFormat('path/file')['base64__md5__complete_filename']
+        'jH3ZIq1HSU_ALDiOEsAOrA'
+        >>> AssetHashFormat('path/file')['3__base64__md5__relpath']
+        '3Hc'
+        >>> AssetHashFormat('path/pr0n.f')['base64__extension']
+        'Zg'
+        '''
+
+        if '__' in key:
+            head, tail = key.split('__', 1)
+
+            item = getattr(self, head, False)
+
+            if callable(item):
+                return item(self[tail])
+
+            if str(head).isdigit():
+                return self[tail][:int(head)]
+
+            raise KeyError("Unable to format '%s'" % key)
+
+        if not hasattr(self, key):
+            raise KeyError('%s not in %s' % (key, self))
+
+        item = getattr(self, key, False)
+
+        if callable(item):
+            return item()
+
+        return str(item)
+
+    def format(self, formatstring):
+        '''
+        >>> AssetHashFormat('path/file').format('%(filename)s')
+        'file'
+        '''
+        return formatstring % self
+
+
+    @staticmethod
+    def md5(data):
+        return md5(data).digest()
+
+    @staticmethod
+    def sha1(data):
+        return sha1(data).digest()
+
+    hash = sha1
+
+    @staticmethod
+    def identity(data):
+        '''
+        >>> AssetHashFormat('./').identity('onetwothree')
+        'onetwothree'
+        '''
+
+        return data
+
+    @staticmethod
+    def base64(data):
+        '''
+        >>> AssetHashFormat('./').base64('1')
+        'MQ'
+        >>> AssetHashFormat('./').base64('123')
+        'MTIz'
+        >>> AssetHashFormat('./').base64('12345')
+        'MTIzNDU'
+        '''
+        return urlsafe_b64encode(data).strip("=")
+
+    def content(self, filename):
+        return open(filename).read()
+
+    '''
+    Naming conventions for path parts:
+
+    /to/input/bar/baz.txt
+    ..............^^^^^^^ .complete_filename
+    ..............^^^.... .filename
+    .................^^^^ .suffix
+    ..................^^^ .extension
+    ..........^^^^^^^^^^^ .relpath
+    ..........^^^^....... .reldir
+    ^^^^^^^^^^^^^^^^^^^^^ .abspath
+    '''
+
+    def abspath(self):
+        '''
+        >>> AssetHashFormat('bar/baz.txt').abspath().startswith('/')
+        True
+        >>> AssetHashFormat('bar/baz.txt').abspath().endswith('bar/baz.txt')
+        True
+        '''
+        return abspath(join(self._input_dir, self._relpath))
+
+    def reldir(self):
+        '''
+        >>> AssetHashFormat('bar/baz.txt').reldir()
+        'bar/'
+        '''
+        reldir = dirname(self._relpath)
+        if reldir:
+            return reldir + '/'
+
+        return ''
+
+    def relpath(self):
+        '''
+        >>> AssetHashFormat('bar/baz.txt').relpath()
+        'bar/baz.txt'
+        '''
+        return self._relpath
+
+    def complete_filename(self):
+        '''
+        >>> AssetHashFormat('/foo/bar/baz.txt').complete_filename()
+        'baz.txt'
+        '''
+        return path_split(self._relpath)[1]
+
+    def filename(self):
+        '''
+        >>> AssetHashFormat('/foo/bar/baz.txt').filename()
+        'baz'
+        '''
+        return splitext(self.complete_filename())[0]
+
+    def suffix(self):
+        '''
+        >>> AssetHashFormat('foo').suffix()
+        ''
+        >>> AssetHashFormat('foo.txt').suffix()
+        '.txt'
+        '''
+        ext = self.extension()
+        if ext:
+            return '.%s' % ext
+        else:
+            return ext
+
+    def extension(self):
+        '''
+        >>> AssetHashFormat('./foo.txt').extension()
+        'txt'
+        '''
+        return splitext(self._relpath)[1].lstrip('.')
 
 class AssetHasher(object):
     def __init__(self, files, output_dir, map_filename, map_name, map_type,
@@ -251,24 +415,31 @@ class AssetHasher(object):
         self.hashfun = hashfun
 
     def digest(self, fun, filename):
-        _, extension = splitext(filename)
+        '''
+        >>> from hashedassets.tests import test_globs
+        >>> write = test_globs()['write']
+        >>> write('a_file', 'a_content')
+        >>> d = AssetHasher(['bar'], 'baz', 'map.txt', 'mapname', 'txt')
+        >>> d.digest('md5', 'a_file')
+        '5a99P0I7P5ySk6lGv7zO4w'
+        '''
+
+        initial = [ str(self.digestlength), 'base64', fun, 'content', 'abspath']
 
         if fun == 'identity':
-            _, hashed_filename = path_split(filename)
+            formatstring = '%(relpath)s'
         else:
-            fun = {'md5': md5, 'sha1': sha1}[fun]
-            hashed_filename = urlsafe_b64encode(
-                    fun(open(join(self.input_dir, filename)).read()).digest()).strip("=")\
-                            [:self.digestlength]
-            if extension and not self.strip_extensions:
-                hashed_filename = "%s%s" % (hashed_filename, extension)
 
-        extra_dirs = ''
+            formatstring = ("%(" + '__'.join(initial) + ")s")
 
-        if self.keep_dirs:
-            extra_dirs, _ = path_split(filename)
+            if self.keep_dirs:
+                formatstring = "%(reldir)s" + formatstring
 
-        return join(extra_dirs, hashed_filename)
+            if not self.strip_extensions:
+                formatstring += "%(suffix)s"
+
+
+        return formatstring % AssetHashFormat(filename, self.input_dir)
 
     def process_file(self, filename):
         logger.debug("Processing file '%s'", filename)
