@@ -234,26 +234,29 @@ class Rewriter(dict):
 
     def __getitem__(self, key):
         '''
-        >>> Rewriter('path/file')['base64__complete_filename']
+        >>> Rewriter('path/file')['complete_filename|base64']
         'ZmlsZQ'
-        >>> Rewriter('path/file')['base64__md5__complete_filename']
+        >>> Rewriter('path/file')['complete_filename|md5|base64']
         'jH3ZIq1HSU_ALDiOEsAOrA'
-        >>> Rewriter('path/file')['3__base64__md5__relpath']
+        >>> Rewriter('path/file')['relpath|md5|base64|3']
         '3Hc'
-        >>> Rewriter('path/pr0n.f')['base64__extension']
+        >>> Rewriter('path/pr0n.f')['extension|base64']
         'Zg'
         '''
 
-        if '__' in key:
-            head, tail = key.split('__', 1)
+        if '|' in key:
+            splitted = key.split('|')
 
-            item = getattr(self, head, False)
+            head = '|'.join(splitted[:-1])
+            tail = splitted[-1]
+
+            item = getattr(self, tail, False)
 
             if callable(item):
-                return item(self[tail])
+                return item(self[head])
 
-            if str(head).isdigit():
-                return self[tail][:int(head)]
+            if str(tail).isdigit():
+                return self[head][:int(tail)]
 
             raise KeyError("Unable to format '%s'" % key)
 
@@ -268,24 +271,25 @@ class Rewriter(dict):
         return str(item)
 
     @classmethod
-    def compute_rewritestring(self, strip_extensions=False, digestlength=9999, keep_dirs=False, hashfun='sha1'):
+    def compute_rewritestring(self, strip_extensions=False, digestlength=None, keep_dirs=False, hashfun='sha1'):
         '''
         >>> Rewriter.compute_rewritestring()
-        '%(9999__base64__sha1__content__abspath)s%(suffix)s'
+        '%(abspath|content|sha1|base64)s%(suffix)s'
         >>> Rewriter.compute_rewritestring(strip_extensions=True)
-        '%(9999__base64__sha1__content__abspath)s'
+        '%(abspath|content|sha1|base64)s'
         >>> Rewriter.compute_rewritestring(digestlength=3)
-        '%(3__base64__sha1__content__abspath)s%(suffix)s'
+        '%(abspath|content|sha1|base64|3)s%(suffix)s'
         '''
 
         if hashfun == 'identity':
             return '%(relpath)s'
 
-        initial = [
-          str(digestlength), 'base64', hashfun, 'content', 'abspath'
-        ]
+        initial = [ 'abspath', 'content', hashfun, 'base64', ]
 
-        rewritestring = ("%(" + '__'.join(initial) + ")s")
+        if digestlength:
+            initial.append(str(digestlength))
+
+        rewritestring = ("%(" + '|'.join(initial) + ")s")
 
         if keep_dirs:
             rewritestring = "%(reldir)s" + rewritestring
