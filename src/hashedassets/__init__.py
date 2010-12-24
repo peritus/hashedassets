@@ -384,15 +384,9 @@ class AssetHashFormat(dict):
         return splitext(self._relpath)[1].lstrip('.')
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type,
-            keep_dirs=False,
-            map_only=False,
-            strip_extensions=False,
-            digestlength=9999,  # don't truncate
-            hashfun='sha1',
-            ):
-
+    def __init__(self, files, output_dir, map_filename, map_name, map_type, formatstring, map_only=False):
         self.input_dir = dirname(commonprefix(files))
+        self.output_dir = output_dir
 
         self.files = OrderedDict.fromkeys(  # python is lisp!
                          map(lambda l: relpath(l, self.input_dir),
@@ -400,41 +394,37 @@ class AssetHasher(object):
 
         logger.debug("Initialized map, is now %s", self.files)
 
-        self.output_dir = output_dir
         self.map_filename = map_filename
         self.map_name = map_name
         self.map_type = map_type
         self.map_only = map_only
-        self.strip_extensions = strip_extensions
-        self.digestlength = digestlength
-        self.keep_dirs = keep_dirs
 
-        if hashfun == None:
-            hashfun = 'sha1'
+        self.formatstring = formatstring
 
-        self.hashfun = hashfun
-
-    @property
-    def formatstring(self):
+    @classmethod
+    def compute_formatstring(self, strip_extensions=False, digestlength=9999, keep_dirs=False, hashfun='sha1'):
         '''
-        >>> h = AssetHasher(['bar'], 'baz', 'map.txt', 'mapname', 'txt')
-        >>> h.formatstring
+        >>> AssetHasher.compute_formatstring()
         '%(9999__base64__sha1__content__abspath)s%(suffix)s'
+        >>> AssetHasher.compute_formatstring(strip_extensions=True)
+        '%(9999__base64__sha1__content__abspath)s'
+        >>> AssetHasher.compute_formatstring(digestlength=3)
+        '%(3__base64__sha1__content__abspath)s%(suffix)s'
         '''
 
-        if self.hashfun == 'identity':
+        if hashfun == 'identity':
             return '%(relpath)s'
 
         initial = [
-          str(self.digestlength), 'base64', self.hashfun, 'content', 'abspath'
+          str(digestlength), 'base64', hashfun, 'content', 'abspath'
         ]
 
         formatstring = ("%(" + '__'.join(initial) + ")s")
 
-        if self.keep_dirs:
+        if keep_dirs:
             formatstring = "%(reldir)s" + formatstring
 
-        if not self.strip_extensions:
+        if not strip_extensions:
             formatstring += "%(suffix)s"
 
         return formatstring
@@ -701,6 +691,9 @@ def main(args=None):
         elif not isdir(output_dir):
             parser.error("Output dir at '%s' is not a directory" % output_dir)
 
+
+    formatstring = AssetHasher.compute_formatstring(options.strip_extensions, options.digestlength, options.keep_dirs, options.hashfun)
+
     AssetHasher(
       files=files,
       output_dir=output_dir,
@@ -708,10 +701,7 @@ def main(args=None):
       map_name=options.map_name,
       map_type=options.map_type,
       map_only=options.map_only,
-      strip_extensions=options.strip_extensions,
-      digestlength=options.digestlength,
-      hashfun=options.hashfun,
-      keep_dirs=options.keep_dirs,
+      formatstring=formatstring,
     ).run()
 
 if __name__ == '__main__':
