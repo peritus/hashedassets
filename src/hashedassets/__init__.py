@@ -230,7 +230,7 @@ class AssetHashFormat(dict):
         >>> AssetHashFormat('foo/bar')
         <AssetHashFormat('foo/bar')>
         '''
-        return "<AssetHashFormat('%s')>" % self.format('%(relpath)s')
+        return "<AssetHashFormat('%(relpath)s')>" % self
 
     def __getitem__(self, key):
         '''
@@ -267,12 +267,8 @@ class AssetHashFormat(dict):
 
         return str(item)
 
-    def format(self, formatstring):
         '''
-        >>> AssetHashFormat('path/file').format('%(filename)s')
-        'file'
         '''
-        return formatstring % self
 
 
     @staticmethod
