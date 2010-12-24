@@ -218,7 +218,7 @@ class SedSerializer(object):
 
 SERIALIZERS['sed'] = SedSerializer
 
-class AssetHashFormat(dict):
+class Rewriter(dict):
 
     def __init__(self, relpath, input_dir=None):
 
@@ -227,20 +227,20 @@ class AssetHashFormat(dict):
 
     def __repr__(self):
         '''
-        >>> AssetHashFormat('foo/bar')
-        <AssetHashFormat('foo/bar')>
+        >>> Rewriter('foo/bar')
+        <Rewriter('foo/bar')>
         '''
-        return "<AssetHashFormat('%(relpath)s')>" % self
+        return "<Rewriter('%(relpath)s')>" % self
 
     def __getitem__(self, key):
         '''
-        >>> AssetHashFormat('path/file')['base64__complete_filename']
+        >>> Rewriter('path/file')['base64__complete_filename']
         'ZmlsZQ'
-        >>> AssetHashFormat('path/file')['base64__md5__complete_filename']
+        >>> Rewriter('path/file')['base64__md5__complete_filename']
         'jH3ZIq1HSU_ALDiOEsAOrA'
-        >>> AssetHashFormat('path/file')['3__base64__md5__relpath']
+        >>> Rewriter('path/file')['3__base64__md5__relpath']
         '3Hc'
-        >>> AssetHashFormat('path/pr0n.f')['base64__extension']
+        >>> Rewriter('path/pr0n.f')['base64__extension']
         'Zg'
         '''
 
@@ -268,13 +268,13 @@ class AssetHashFormat(dict):
         return str(item)
 
     @classmethod
-    def compute_formatstring(self, strip_extensions=False, digestlength=9999, keep_dirs=False, hashfun='sha1'):
+    def compute_rewritestring(self, strip_extensions=False, digestlength=9999, keep_dirs=False, hashfun='sha1'):
         '''
-        >>> AssetHashFormat.compute_formatstring()
+        >>> Rewriter.compute_rewritestring()
         '%(9999__base64__sha1__content__abspath)s%(suffix)s'
-        >>> AssetHashFormat.compute_formatstring(strip_extensions=True)
+        >>> Rewriter.compute_rewritestring(strip_extensions=True)
         '%(9999__base64__sha1__content__abspath)s'
-        >>> AssetHashFormat.compute_formatstring(digestlength=3)
+        >>> Rewriter.compute_rewritestring(digestlength=3)
         '%(3__base64__sha1__content__abspath)s%(suffix)s'
         '''
 
@@ -285,15 +285,15 @@ class AssetHashFormat(dict):
           str(digestlength), 'base64', hashfun, 'content', 'abspath'
         ]
 
-        formatstring = ("%(" + '__'.join(initial) + ")s")
+        rewritestring = ("%(" + '__'.join(initial) + ")s")
 
         if keep_dirs:
-            formatstring = "%(reldir)s" + formatstring
+            rewritestring = "%(reldir)s" + rewritestring
 
         if not strip_extensions:
-            formatstring += "%(suffix)s"
+            rewritestring += "%(suffix)s"
 
-        return formatstring
+        return rewritestring
 
     @staticmethod
     def md5(data):
@@ -308,7 +308,7 @@ class AssetHashFormat(dict):
     @staticmethod
     def identity(data):
         '''
-        >>> AssetHashFormat('./').identity('onetwothree')
+        >>> Rewriter('./').identity('onetwothree')
         'onetwothree'
         '''
 
@@ -317,11 +317,11 @@ class AssetHashFormat(dict):
     @staticmethod
     def base64(data):
         '''
-        >>> AssetHashFormat('./').base64('1')
+        >>> Rewriter('./').base64('1')
         'MQ'
-        >>> AssetHashFormat('./').base64('123')
+        >>> Rewriter('./').base64('123')
         'MTIz'
-        >>> AssetHashFormat('./').base64('12345')
+        >>> Rewriter('./').base64('12345')
         'MTIzNDU'
         '''
         return urlsafe_b64encode(data).strip("=")
@@ -344,16 +344,16 @@ class AssetHashFormat(dict):
 
     def abspath(self):
         '''
-        >>> AssetHashFormat('bar/baz.txt').abspath().startswith('/')
+        >>> Rewriter('bar/baz.txt').abspath().startswith('/')
         True
-        >>> AssetHashFormat('bar/baz.txt').abspath().endswith('bar/baz.txt')
+        >>> Rewriter('bar/baz.txt').abspath().endswith('bar/baz.txt')
         True
         '''
         return abspath(join(self._input_dir, self._relpath))
 
     def reldir(self):
         '''
-        >>> AssetHashFormat('bar/baz.txt').reldir()
+        >>> Rewriter('bar/baz.txt').reldir()
         'bar/'
         '''
         reldir = dirname(self._relpath)
@@ -364,30 +364,30 @@ class AssetHashFormat(dict):
 
     def relpath(self):
         '''
-        >>> AssetHashFormat('bar/baz.txt').relpath()
+        >>> Rewriter('bar/baz.txt').relpath()
         'bar/baz.txt'
         '''
         return self._relpath
 
     def complete_filename(self):
         '''
-        >>> AssetHashFormat('/foo/bar/baz.txt').complete_filename()
+        >>> Rewriter('/foo/bar/baz.txt').complete_filename()
         'baz.txt'
         '''
         return path_split(self._relpath)[1]
 
     def filename(self):
         '''
-        >>> AssetHashFormat('/foo/bar/baz.txt').filename()
+        >>> Rewriter('/foo/bar/baz.txt').filename()
         'baz'
         '''
         return splitext(self.complete_filename())[0]
 
     def suffix(self):
         '''
-        >>> AssetHashFormat('foo').suffix()
+        >>> Rewriter('foo').suffix()
         ''
-        >>> AssetHashFormat('foo.txt').suffix()
+        >>> Rewriter('foo.txt').suffix()
         '.txt'
         '''
         ext = self.extension()
@@ -398,13 +398,13 @@ class AssetHashFormat(dict):
 
     def extension(self):
         '''
-        >>> AssetHashFormat('./foo.txt').extension()
+        >>> Rewriter('./foo.txt').extension()
         'txt'
         '''
         return splitext(self._relpath)[1].lstrip('.')
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type, formatstring, map_only=False):
+    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False):
         self.input_dir = dirname(commonprefix(files))
         self.output_dir = output_dir
 
@@ -419,13 +419,13 @@ class AssetHasher(object):
         self.map_type = map_type
         self.map_only = map_only
 
-        self.formatstring = formatstring
+        self.rewritestring = rewritestring
 
     def process_file(self, filename):
         logger.debug("Processing file '%s'", filename)
 
         try:
-            hashed_filename = self.formatstring % AssetHashFormat(
+            hashed_filename = self.rewritestring % Rewriter(
               filename, self.input_dir)
         except IOError, e:
             logger.debug("'%s' does not exist, can't be hashed", filename, exc_info=e)
@@ -684,7 +684,7 @@ def main(args=None):
             parser.error("Output dir at '%s' is not a directory" % output_dir)
 
 
-    formatstring = AssetHashFormat.compute_formatstring(options.strip_extensions, options.digestlength, options.keep_dirs, options.hashfun)
+    rewritestring = Rewriter.compute_rewritestring(options.strip_extensions, options.digestlength, options.keep_dirs, options.hashfun)
 
     AssetHasher(
       files=files,
@@ -693,7 +693,7 @@ def main(args=None):
       map_name=options.map_name,
       map_type=options.map_type,
       map_only=options.map_only,
-      formatstring=formatstring,
+      rewritestring=rewritestring,
     ).run()
 
 if __name__ == '__main__':
