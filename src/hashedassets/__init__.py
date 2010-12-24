@@ -414,38 +414,37 @@ class AssetHasher(object):
 
         self.hashfun = hashfun
 
-    def digest(self, fun, filename):
+    @property
+    def formatstring(self):
         '''
-        >>> from hashedassets.tests import test_globs
-        >>> write = test_globs()['write']
-        >>> write('a_file', 'a_content')
-        >>> d = AssetHasher(['bar'], 'baz', 'map.txt', 'mapname', 'txt')
-        >>> d.digest('md5', 'a_file')
-        '5a99P0I7P5ySk6lGv7zO4w'
+        >>> h = AssetHasher(['bar'], 'baz', 'map.txt', 'mapname', 'txt')
+        >>> h.formatstring
+        '%(9999__base64__sha1__content__abspath)s%(suffix)s'
         '''
 
-        initial = [ str(self.digestlength), 'base64', fun, 'content', 'abspath']
+        if self.hashfun == 'identity':
+            return '%(relpath)s'
 
-        if fun == 'identity':
-            formatstring = '%(relpath)s'
-        else:
+        initial = [
+          str(self.digestlength), 'base64', self.hashfun, 'content', 'abspath'
+        ]
 
-            formatstring = ("%(" + '__'.join(initial) + ")s")
+        formatstring = ("%(" + '__'.join(initial) + ")s")
 
-            if self.keep_dirs:
-                formatstring = "%(reldir)s" + formatstring
+        if self.keep_dirs:
+            formatstring = "%(reldir)s" + formatstring
 
-            if not self.strip_extensions:
-                formatstring += "%(suffix)s"
+        if not self.strip_extensions:
+            formatstring += "%(suffix)s"
 
-
-        return formatstring % AssetHashFormat(filename, self.input_dir)
+        return formatstring
 
     def process_file(self, filename):
         logger.debug("Processing file '%s'", filename)
 
         try:
-            hashed_filename = self.digest(self.hashfun, filename)
+            hashed_filename = self.formatstring % AssetHashFormat(
+              filename, self.input_dir)
         except IOError, e:
             logger.debug("'%s' does not exist, can't be hashed", filename, exc_info=e)
             return
