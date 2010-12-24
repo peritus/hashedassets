@@ -267,9 +267,33 @@ class AssetHashFormat(dict):
 
         return str(item)
 
+    @classmethod
+    def compute_formatstring(self, strip_extensions=False, digestlength=9999, keep_dirs=False, hashfun='sha1'):
         '''
+        >>> AssetHashFormat.compute_formatstring()
+        '%(9999__base64__sha1__content__abspath)s%(suffix)s'
+        >>> AssetHashFormat.compute_formatstring(strip_extensions=True)
+        '%(9999__base64__sha1__content__abspath)s'
+        >>> AssetHashFormat.compute_formatstring(digestlength=3)
+        '%(3__base64__sha1__content__abspath)s%(suffix)s'
         '''
 
+        if hashfun == 'identity':
+            return '%(relpath)s'
+
+        initial = [
+          str(digestlength), 'base64', hashfun, 'content', 'abspath'
+        ]
+
+        formatstring = ("%(" + '__'.join(initial) + ")s")
+
+        if keep_dirs:
+            formatstring = "%(reldir)s" + formatstring
+
+        if not strip_extensions:
+            formatstring += "%(suffix)s"
+
+        return formatstring
 
     @staticmethod
     def md5(data):
@@ -396,34 +420,6 @@ class AssetHasher(object):
         self.map_only = map_only
 
         self.formatstring = formatstring
-
-    @classmethod
-    def compute_formatstring(self, strip_extensions=False, digestlength=9999, keep_dirs=False, hashfun='sha1'):
-        '''
-        >>> AssetHasher.compute_formatstring()
-        '%(9999__base64__sha1__content__abspath)s%(suffix)s'
-        >>> AssetHasher.compute_formatstring(strip_extensions=True)
-        '%(9999__base64__sha1__content__abspath)s'
-        >>> AssetHasher.compute_formatstring(digestlength=3)
-        '%(3__base64__sha1__content__abspath)s%(suffix)s'
-        '''
-
-        if hashfun == 'identity':
-            return '%(relpath)s'
-
-        initial = [
-          str(digestlength), 'base64', hashfun, 'content', 'abspath'
-        ]
-
-        formatstring = ("%(" + '__'.join(initial) + ")s")
-
-        if keep_dirs:
-            formatstring = "%(reldir)s" + formatstring
-
-        if not strip_extensions:
-            formatstring += "%(suffix)s"
-
-        return formatstring
 
     def process_file(self, filename):
         logger.debug("Processing file '%s'", filename)
@@ -688,7 +684,7 @@ def main(args=None):
             parser.error("Output dir at '%s' is not a directory" % output_dir)
 
 
-    formatstring = AssetHasher.compute_formatstring(options.strip_extensions, options.digestlength, options.keep_dirs, options.hashfun)
+    formatstring = AssetHashFormat.compute_formatstring(options.strip_extensions, options.digestlength, options.keep_dirs, options.hashfun)
 
     AssetHasher(
       files=files,
