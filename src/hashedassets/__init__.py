@@ -15,7 +15,7 @@ from base64 import urlsafe_b64encode
 import logging
 from glob import glob
 from optparse import OptionParser
-from os import remove, mkdir, makedirs
+from os import remove, mkdir, makedirs, listdir, walk
 from os.path import join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix, \
                     split as path_split, samefile, abspath
@@ -410,11 +410,28 @@ class Rewriter(dict):
 class AssetHasher(object):
     def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False):
         self.input_dir = dirname(commonprefix(files))
+
+        logger.debug('Input dir is "%s"', self.input_dir)
+
         self.output_dir = output_dir
 
-        self.files = OrderedDict.fromkeys(  # python is lisp!
-                         map(lambda l: relpath(l, self.input_dir),
-                             chain.from_iterable(map(glob, files))))
+        logger.debug('Output dir is "%s"', self.output_dir)
+
+        logger.debug('Incoming files: %s', files)
+
+        relative_files = map(lambda l: relpath(l, self.input_dir),
+                             chain.from_iterable(map(glob, files)))
+
+        logger.debug('Relative files: %s', relative_files)
+
+        for file_or_dir in relative_files:
+            for walkroot, _, walkfiles in walk(join(self.input_dir, file_or_dir)):
+                for walkfile in walkfiles:
+                    relative_files.append(join(relpath(walkroot, self.input_dir), walkfile))
+
+        logger.debug('Resolved subdir files: %s', relative_files)
+
+        self.files = OrderedDict.fromkeys(relative_files)
 
         logger.debug("Initialized map, is now %s", self.files)
 
@@ -473,6 +490,9 @@ class AssetHasher(object):
             if not self.map_only:
                 copy2(infile, outfile)
         except IOError, e:
+            if e.strerror == 'Is a directory':
+                return # nothing to copy
+
             if not e.strerror == 'No such file or directory':
                 raise
 

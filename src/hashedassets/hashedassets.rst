@@ -47,6 +47,16 @@ Modification time is also preserved:
 ...   for prop in ('st_mtime', 'st_atime', 'st_ino',)]
 [True, True, False]
 
+If you specify a directory as source, all files and subdirectories will be processed:
+
+>>> system("hashedassets maps/dirmap.txt input/ output/")
+cp 'input/./foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+cp 'input/subdir/2nd/baz.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
+
+>>> system("rm output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt")
+
+
 Output formats
 --------------
 
