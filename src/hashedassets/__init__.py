@@ -220,10 +220,10 @@ SERIALIZERS['sed'] = SedSerializer
 
 class Rewriter(dict):
 
-    def __init__(self, relpath, input_dir=None):
+    def __init__(self, relpath, basedir=None):
 
-        self._relpath = relpath # path, relative to input_dir
-        self._input_dir = input_dir or '.'
+        self._relpath = relpath # path, relative to basedir
+        self._basedir = basedir or '.'
 
     def __repr__(self):
         '''
@@ -353,7 +353,7 @@ class Rewriter(dict):
         >>> Rewriter('bar/baz.txt').abspath().endswith('bar/baz.txt')
         True
         '''
-        return abspath(join(self._input_dir, self._relpath))
+        return abspath(join(self._basedir, self._relpath))
 
     def reldir(self):
         '''
@@ -408,10 +408,10 @@ class Rewriter(dict):
         return splitext(self._relpath)[1].lstrip('.')
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False):
-        self.input_dir = dirname(commonprefix(files))
+    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, basedir=None):
+        self.basedir = dirname(commonprefix(files))
 
-        logger.debug('Input dir is "%s"', self.input_dir)
+        logger.debug('Input dir is "%s"', self.basedir)
 
         self.output_dir = output_dir
 
@@ -419,15 +419,15 @@ class AssetHasher(object):
 
         logger.debug('Incoming files: %s', files)
 
-        relative_files = map(lambda l: relpath(l, self.input_dir),
+        relative_files = map(lambda l: relpath(l, self.basedir),
                              chain.from_iterable(map(glob, files)))
 
         logger.debug('Relative files: %s', relative_files)
 
         for file_or_dir in relative_files:
-            for walkroot, _, walkfiles in walk(join(self.input_dir, file_or_dir)):
+            for walkroot, _, walkfiles in walk(join(self.basedir, file_or_dir)):
                 for walkfile in walkfiles:
-                    relative_files.append(join(relpath(walkroot, self.input_dir), walkfile))
+                    relative_files.append(join(relpath(walkroot, self.basedir), walkfile))
 
         logger.debug('Resolved subdir files: %s', relative_files)
 
@@ -447,7 +447,7 @@ class AssetHasher(object):
 
         try:
             hashed_filename = self.rewritestring % Rewriter(
-              filename, self.input_dir)
+              filename, self.basedir)
         except IOError, e:
             logger.debug("'%s' does not exist, can't be hashed", filename, exc_info=e)
             return
@@ -474,7 +474,7 @@ class AssetHasher(object):
                     logger.info("rm '%s'", outfile)
 
 
-        infile = join(self.input_dir, filename)
+        infile = join(self.basedir, filename)
         outfile = join(self.output_dir, hashed_filename)
 
         try:
