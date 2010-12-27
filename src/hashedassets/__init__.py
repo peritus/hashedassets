@@ -503,16 +503,12 @@ class AssetHasher(object):
             makedirs(join(self.output_dir, create_dir))
 
             # try again
-            copy2(join(self.input_dir, filename), join(self.output_dir,
-                hashed_filename))
+            copy2(infile, outfile)
 
         self.files[filename] = hashed_filename
 
         if not self.map_only:
-            logger.info(
-                "cp '%s' '%s'",
-                join(self.input_dir, filename),
-                join(self.output_dir, hashed_filename))
+            logger.info("cp '%s' '%s'", infile, outfile)
 
     def process_all_files(self):
         for f in self.files:
