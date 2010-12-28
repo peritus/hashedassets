@@ -167,9 +167,13 @@ class AssetHasher(object):
         if not self.map_filename:
             return
 
-        serialized = SERIALIZERS[self.map_type].serialize(OrderedDict(
-            (k,v) for k, v in self.files.iteritems() if v != None
-            ), self.map_name)
+        newmap = OrderedDict()
+
+        for key, value in self.files.iteritems():
+            if value != None:
+                newmap[key] = value
+
+        serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
 
         f = open(self.map_filename, "w")
         f.write(serialized)
