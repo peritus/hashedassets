@@ -20,7 +20,7 @@ from optparse import OptionParser
 from os import remove, mkdir, makedirs, listdir, walk
 from os.path import join, exists, isdir, relpath, \
                     splitext, normpath, dirname, commonprefix, \
-                    split as path_split, samefile
+                    split as path_split, samefile, abspath
 from re import split as re_split
 from shutil import copy2, Error as shutil_Error
 import sys
@@ -41,7 +41,7 @@ logger = logging.getLogger("hashedassets")
 __version__ = 0, 2, '3dev0'
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, basedir=None):
+    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, basedir=None, refdir=None):
         self.basedir = dirname(commonprefix(files))
 
         logger.debug('Input dir is "%s"', self.basedir)
@@ -72,6 +72,8 @@ class AssetHasher(object):
         self.map_name = map_name
         self.map_type = map_type
         self.map_only = map_only
+
+        self.refdir = refdir
 
         self.rewritestring = rewritestring
 
@@ -107,8 +109,8 @@ class AssetHasher(object):
                     logger.info("rm '%s'", outfile)
 
 
-        infile = join(self.basedir, filename)
-        outfile = join(self.output_dir, hashed_filename)
+        infile = join(self.basedir, filename).replace('/./', '/')
+        outfile = join(self.output_dir, hashed_filename).replace('/./', '/')
 
         try:
             if samefile(infile, outfile):
@@ -169,9 +171,13 @@ class AssetHasher(object):
 
         newmap = OrderedDict()
 
-        for key, value in self.files.iteritems():
-            if value != None:
-                newmap[key] = value
+        for origin, target in self.files.iteritems():
+            if target != None:
+                if self.refdir:
+                    target = relpath(join(self.output_dir, target), self.refdir)
+                if origin.startswith('./'):
+                    origin = origin[2:]
+                newmap[origin] = target
 
         serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
 
@@ -293,6 +299,14 @@ def main(args=None):
       help="Strip the file extensions from the hashed files",
     )
 
+    parser.add_option(
+      "--refdir",
+      dest="refdir",
+      default=None,
+      type="string",
+      help="Paths in map will be relative to this directory",
+    )
+
     (options, args) = parser.parse_args(args)
 
     if options.identity:
@@ -351,6 +365,7 @@ def main(args=None):
       map_type=options.map_type,
       map_only=options.map_only,
       rewritestring=rewritestring,
+      refdir=options.refdir,
     ).run()
 
 if __name__ == '__main__':

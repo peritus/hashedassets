@@ -50,7 +50,7 @@ Modification time is also preserved:
 If you specify a directory as source, all files and subdirectories will be processed:
 
 >>> system("hashedassets maps/dirmap.txt input/ output/")
-cp 'input/./foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 cp 'input/subdir/2nd/baz.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
@@ -293,6 +293,27 @@ If we tell the command to be more verbose, it logs more information:
 >>> system("hashedassets -v maps/map3.txt input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+Relative paths with --refdir
+++++++++++++++++++++++++++++
+
+If you need all paths relative to a specific dir, ``--refdir`` is your friend:
+
+>>> system("hashedassets --keep-dirs --refdir=output/subdir/ maps/refmap.txt input/ output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+mkdir -p output/subdir
+cp 'input/subdir/bar.txt' 'output/subdir/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+mkdir -p output/subdir/2nd
+cp 'input/subdir/2nd/baz.txt' 'output/subdir/2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
+
+>>> print open('maps/refmap.txt').read()
+foo.txt: ../C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
+subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
+subdir/2nd/baz.txt: 2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
+
+>>> system("rm -r output/subdir/")
+
+
 
 Advanced usage
 --------------
