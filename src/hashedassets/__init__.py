@@ -211,15 +211,6 @@ def main(args=None):
     )
 
     parser.add_option(
-      "-q",
-      "--quiet",
-      action="store_const",
-      const=0,
-      dest="verbosity",
-      help="don't print status messages to stdout",
-    )
-
-    parser.add_option(
       "-n",
       "--map-name",
       default="hashedassets",
