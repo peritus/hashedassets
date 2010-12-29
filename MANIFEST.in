@@ -1,2 +1,3 @@
 include src/hashedassets/*.rst
+include version.py
 include RELEASE-VERSION
