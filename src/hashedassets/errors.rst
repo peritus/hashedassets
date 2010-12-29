@@ -20,7 +20,6 @@ Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -v, --verbose         increase verbosity level
-  -q, --quiet           don't print status messages to stdout
   -n MAPNAME, --map-name=MAPNAME
                         name of the map [default: hashedassets]
   -t MAPTYPE, --map-type=MAPTYPE

@@ -22,7 +22,7 @@ We also create files that live in a sub- and subsubdirectories:
 Simple usage
 ------------
 
->>> system("hashedassets maps/map.txt input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.txt input/*.txt input/*/*.txt output/")
 mkdir 'output'
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
@@ -49,7 +49,7 @@ Modification time is also preserved:
 
 If you specify a directory as source, all files and subdirectories will be processed:
 
->>> system("hashedassets maps/dirmap.txt input/ output/")
+>>> system("hashedassets -v maps/dirmap.txt input/ output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 cp 'input/subdir/2nd/baz.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
@@ -67,7 +67,7 @@ Sed
 
 This generates a sed script that does the replacements for us:
 
->>> system("hashedassets -n my_callback maps/map.sed input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -n my_callback maps/map.sed input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -94,7 +94,7 @@ Note '.' is not treated as wildcard, so the following does not work
 JavaScript
 ++++++++++
 
->>> system("hashedassets -n my_callback maps/map.js input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -n my_callback maps/map.js input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -107,7 +107,7 @@ var my_callback = {
 JSON
 ++++
 
->>> system("hashedassets -n my_callback maps/map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -n my_callback maps/map.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -120,7 +120,7 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 JSONP
 +++++
 
->>> system("hashedassets -n my_callback maps/map.jsonp input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -n my_callback maps/map.jsonp input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -135,7 +135,7 @@ SCSS
 
 `Sass <http://sass-lang.com/>`__ ("Syntactically Awesome Stylesheets") is a meta language on top of CSS.
 
->>> system("hashedassets -n my_callback maps/map.scss input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -n my_callback maps/map.scss input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -152,7 +152,7 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 PHP
 +++
 
->>> system("hashedassets -n my_callback maps/map.php input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -n my_callback maps/map.php input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
@@ -172,14 +172,14 @@ Specifying the type with -t
 The type of the map is guessed from the filename, but you can specify it as
 well:
 
->>> system("hashedassets -t js cantguessmaptype input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -t js cantguessmaptype input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
 Specifying the length of the filename with -l
 +++++++++++++++++++++++++++++++++++++++++++++
 
->>> system("hashedassets -l 10 maps/shortmap.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -l 10 maps/shortmap.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IO.txt'
 
@@ -192,7 +192,7 @@ Hashedassets uses sha1 by default to hash the input files. You can change that
 with the -d command line parameter, e.g. by specifying -d md5 to use the md5
 digest method.
 
->>> system("hashedassets -d md5 maps/md5map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v -d md5 maps/md5map.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/rL0Y20zC-Fzt72VPzMSk2A.txt'
 cp 'input/subdir/bar.txt' 'output/N7UdGUp1E-RbVvZSTy1R8g.txt'
 
@@ -204,7 +204,7 @@ Keep the directory structure with --keep-dirs
 By default hashedassets copies all output files into the root level of the
 output dir. You can turn this off, with the ''--keep-dirs'' option:
 
->>> system("hashedassets --keep-dirs maps/preserve.json input/*.txt input/*/*.txt input/*/*/*.txt output/")
+>>> system("hashedassets -v --keep-dirs maps/preserve.json input/*.txt input/*/*.txt input/*/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 mkdir -p output/subdir
 cp 'input/subdir/bar.txt' 'output/subdir/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
@@ -221,7 +221,7 @@ any files. This is useful, if you want to use the hashed name as part of the
 path ('''http://static.example.com/aYs23A/subdir/bar.txt''') that is dropped by
 the webserver during url rewriting.
 
->>> system("hashedassets --map-only maps/maponly.txt input/*.txt")
+>>> system("hashedassets -v --map-only maps/maponly.txt input/*.txt")
 >>> print open('maps/maponly.txt').read()
 foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 <BLANKLINE>
@@ -235,7 +235,7 @@ file to itself, similar to how the `identity function
 this if you want to disable hashedassets temporarily, but don't want to alter
 your build script heavily:
 
->>> system("hashedassets --identity maps/identitymap.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v --identity maps/identitymap.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/foo.txt'
 mkdir -p output/subdir
 cp 'input/subdir/bar.txt' 'output/subdir/bar.txt'
@@ -269,7 +269,7 @@ If you want to strip the file extensions of the resulting hashed files, this
 option is for you! This is particularly useful in combination with the
 ''--map-only'' option with the hashed name becoming part of the path of the url.
 
->>> system("hashedassets --strip-extensions maps/noextensions.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v --strip-extensions maps/noextensions.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00'
 
@@ -284,11 +284,12 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00'
 Verbose mode with -v
 ++++++++++++++++++++
 
-If we tell the command to be quiet, it does not print what it is doing:
+Usually the program does not print anything if it everything works as expected:
 
->>> system("hashedassets -q maps/map2.txt input/*.txt input/*/*.txt output/")
+>>> system("hashedassets maps/map2.txt input/*.txt input/*/*.txt output/")
 
-If we tell the command to be more verbose, it logs more information:
+You can tell the program to log more information (using ``-v``), optionally
+multiple times to see what's going on inside:
 
 >>> system("hashedassets -v maps/map3.txt input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
@@ -299,7 +300,7 @@ Relative paths with --refdir
 
 If you need all paths relative to a specific dir, ``--refdir`` is your friend:
 
->>> system("hashedassets --keep-dirs --refdir=output/subdir/ maps/refmap.txt input/ output/")
+>>> system("hashedassets -v --keep-dirs --refdir=output/subdir/ maps/refmap.txt input/ output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 mkdir -p output/subdir
 cp 'input/subdir/bar.txt' 'output/subdir/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
@@ -313,7 +314,7 @@ subdir/2nd/baz.txt: 2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
 
 If we execute this again, there is no work to do:
 
->>> system("hashedassets --keep-dirs --refdir=output/subdir/ maps/refmap.txt input/ output/")
+>>> system("hashedassets -v --keep-dirs --refdir=output/subdir/ maps/refmap.txt input/ output/")
 
 >>> system("rm -r output/subdir/")
 
@@ -326,19 +327,19 @@ Re-using a map
 The program reads in maps it created in a prior run to only copy files that
 haven't changed since. So, the following commands do not copy any files:
 
->>> system("hashedassets maps/map.scss input/*.txt input/*/*.txt output/")
->>> system("hashedassets maps/map.php input/*.txt input/*/*.txt output/")
->>> system("hashedassets maps/map.js input/*.txt input/*/*.txt output/")
->>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
->>> system("hashedassets maps/map.sed input/*.txt input/*/*.txt output/")
->>> system("hashedassets maps/map.jsonp input/*.txt input/*/*.txt output/")
->>> system("hashedassets maps/map.txt input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.scss input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.php input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.js input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.sed input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.jsonp input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.txt input/*.txt input/*/*.txt output/")
 
 If we touch one of the input files in between, the file will be read but not
 copied because the hashsum is the same:
 
 >>> system('touch -t200504072214.12 input/foo.txt')
->>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.json input/*.txt input/*/*.txt output/")
 
 If we change the file's content, it will get a new name:
 
@@ -346,7 +347,7 @@ If we change the file's content, it will get a new name:
 
 Then try again:
 
->>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.json input/*.txt input/*/*.txt output/")
 rm 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/foo.txt' 'output/QIDaFD7KLKQh0l5O6b8exdew3b0.txt'
 
@@ -360,7 +361,7 @@ Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 If we remove one of the created files, it gets recreated:
 
 >>> system("rm output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt")
->>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.json input/*.txt input/*/*.txt output/")
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
 >>> system("ls output/")
@@ -372,7 +373,7 @@ isn't recreated:
 
 >>> system("rm output/QIDaFD7KLKQh0l5O6b8exdew3b0.txt")
 >>> write("input/foo.txt", "foofoofoo")
->>> system("hashedassets maps/map.json input/*.txt input/*/*.txt output/")
+>>> system("hashedassets -v maps/map.json input/*.txt input/*/*.txt output/")
 cp 'input/foo.txt' 'output/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 Using the same directory for SOURCE and DEST
@@ -385,7 +386,7 @@ cp 'input/foo.txt' 'input/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 Even after the command is invoked a second time:
 
->>> system("hashedassets maps/samedir.json input/*.txt input/")
+>>> system("hashedassets -v maps/samedir.json input/*.txt input/")
 
 Notice, that the mapfile does not contain the self-reference:
 

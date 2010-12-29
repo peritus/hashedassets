@@ -314,7 +314,7 @@ def main(args=None):
         options.keep_dirs = True
 
     if options.verbosity == None:
-        options.verbosity = 1
+        options.verbosity = 0
 
     if len(logger.handlers) == 0:
         ch = logging.StreamHandler(sys.stdout)
