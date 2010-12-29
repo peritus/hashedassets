@@ -1,1 +1,2 @@
 include src/hashedassets/*.rst
+include RELEASE-VERSION

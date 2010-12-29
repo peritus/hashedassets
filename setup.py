@@ -26,9 +26,11 @@ try:
 except ImportError:
     install_requires.append("odict==1.3.2")
 
+from version import get_git_version
+
 setup(
     name=name,
-    version = ".".join(str(n) for n in hashedassets.__version__),
+    version=get_git_version().lstrip('v'),
     url='http://www.python.org/pypi/'+name,
     license='Beerware',
     description='Copies files to filenames based on their contents',

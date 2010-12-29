@@ -1,4 +1,5 @@
 .installed.cfg
+RELEASE-VERSION
 bin/buildout
 bin/hashedassets
 bin/pylint
