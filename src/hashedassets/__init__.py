@@ -60,7 +60,7 @@ class AssetHasher(object):
         for file_or_dir in relative_files:
             for walkroot, _, walkfiles in walk(join(self.basedir, file_or_dir)):
                 for walkfile in walkfiles:
-                    relative_files.append(join(relpath(walkroot, self.basedir), walkfile))
+                    relative_files.append(normpath(join(relpath(walkroot, self.basedir), walkfile)))
 
         logger.debug('Resolved subdir files: %s', relative_files)
 
@@ -175,8 +175,6 @@ class AssetHasher(object):
             if target != None:
                 if self.refdir:
                     target = relpath(join(self.output_dir, target), self.refdir)
-                if origin.startswith('./'):
-                    origin = origin[2:]
                 newmap[origin] = target
 
         serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
