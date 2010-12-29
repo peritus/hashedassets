@@ -31,6 +31,8 @@
 #
 #   include RELEASE-VERSION
 
+RELEASE_VERSION_PATH = 'src/hashedassets/RELEASE-VERSION'
+
 __all__ = ("get_git_version")
 
 from subprocess import Popen, PIPE
@@ -50,7 +52,7 @@ def call_git_describe(abbrev=4):
 
 def read_release_version():
     try:
-        f = open("RELEASE-VERSION", "r")
+        f = open(RELEASE_VERSION_PATH, "r")
 
         try:
             version = f.readlines()[0]
@@ -64,7 +66,7 @@ def read_release_version():
 
 
 def write_release_version(version):
-    f = open("RELEASE-VERSION", "w")
+    f = open(RELEASE_VERSION_PATH, "w")
     f.write("%s\n" % version)
     f.close()
 
