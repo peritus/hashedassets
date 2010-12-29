@@ -311,9 +311,11 @@ foo.txt: ../C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 subdir/2nd/baz.txt: 2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
 
+If we execute this again, there is no work to do:
+
+>>> system("hashedassets --keep-dirs --refdir=output/subdir/ maps/refmap.txt input/ output/")
+
 >>> system("rm -r output/subdir/")
-
-
 
 Advanced usage
 --------------

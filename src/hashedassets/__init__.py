@@ -161,6 +161,8 @@ class AssetHasher(object):
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
         for filename, hashed_filename in deserialized.iteritems():
+            if self.refdir:
+                hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
             self.files[filename] = hashed_filename
 
         logger.debug("Read map, is now: %s", self.files)
