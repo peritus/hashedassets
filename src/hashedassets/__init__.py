@@ -38,7 +38,7 @@ except ImportError:
 
 logger = logging.getLogger("hashedassets")
 
-__version__ = 0, 2, '3dev0'
+__version__ = 0, 3, '0b1'
 
 class AssetHasher(object):
     def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, basedir=None, refdir=None):
