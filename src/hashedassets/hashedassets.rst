@@ -308,9 +308,9 @@ mkdir -p output/subdir/2nd
 cp 'input/subdir/2nd/baz.txt' 'output/subdir/2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
 >>> print open('maps/refmap.txt').read()
-foo.txt: ../C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
-subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
-subdir/2nd/baz.txt: 2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
+../foo.txt: ../C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
+bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
+2nd/baz.txt: 2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
 
 If we execute this again, there is no work to do:
 
