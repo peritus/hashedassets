@@ -46,14 +46,15 @@ def test_globs():
 def test_suite():
     setUp()
 
+    opts = dict(
+      globs=test_globs(),
+      optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS|doctest.REPORT_UDIFF,
+    )
+
     return unittest.TestSuite([
         doctest.DocTestSuite('hashedassets'),
-        doctest.DocFileSuite(
-            'hashedassets.rst',
-            globs=test_globs(),
-            optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS|doctest.REPORT_UDIFF),
-        doctest.DocFileSuite(
-            'errors.rst',
-            globs=test_globs(),
-            optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS|doctest.REPORT_UDIFF),
+        doctest.DocTestSuite('hashedassets.rewrite'),
+        doctest.DocTestSuite('hashedassets.serializer'),
+        doctest.DocFileSuite('hashedassets.rst', **opts),
+        doctest.DocFileSuite('errors.rst', **opts),
     ])
