@@ -77,7 +77,7 @@ class AssetHasher(object):
         self.map_type = map_type
         self.map_only = map_only
 
-        self.refdir = refdir
+        self.refdir = refdir or self.output_dir
 
         self.rewritestring = rewritestring
 
@@ -165,9 +165,8 @@ class AssetHasher(object):
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
         for filename, hashed_filename in deserialized.iteritems():
-            if self.refdir:
-                hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
-                filename = relpath(join(self.refdir, filename), self.output_dir)
+            hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
+            filename = relpath(join(self.refdir, filename), self.output_dir)
             self.files[filename] = hashed_filename
 
         logger.debug("Read map, is now: %s", self.files)
@@ -180,9 +179,8 @@ class AssetHasher(object):
 
         for origin, target in self.files.iteritems():
             if target != None:
-                if self.refdir:
-                    target = relpath(join(self.output_dir, target), self.refdir)
-                    origin = relpath(join(self.output_dir, origin), self.refdir)
+                origin = relpath(join(self.output_dir, origin), self.refdir)
+                target = relpath(join(self.output_dir, target), self.refdir)
                 newmap[origin] = target
 
         serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
