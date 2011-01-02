@@ -46,7 +46,10 @@ class AssetHasher(object):
         basedir = commonprefix(files)
         logger.debug('Prefix is "%s"', basedir)
 
-        self.basedir = dirname(basedir)
+        if isdir(basedir):
+            self.basedir = basedir
+        else:
+            self.basedir = dirname(basedir)
 
         logger.debug('Basedir is "%s"', self.basedir)
 
