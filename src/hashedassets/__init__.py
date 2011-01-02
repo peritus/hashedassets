@@ -40,7 +40,7 @@ logger = logging.getLogger("hashedassets")
 
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, basedir=None, refdir=None):
+    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, refdir=None):
         self.basedir = dirname(commonprefix(files))
 
         logger.debug('Input dir is "%s"', self.basedir)
