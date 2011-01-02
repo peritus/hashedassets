@@ -317,7 +317,7 @@ def main(args=None):
         options.verbosity = 0
 
     if len(logger.handlers) == 0:
-        ch = logging.StreamHandler(sys.stdout)
+        ch = logging.StreamHandler(sys.stderr)
         logger.addHandler(ch)
 
     log_level = {

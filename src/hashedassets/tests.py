@@ -22,7 +22,12 @@ def test_globs():
         cmdline = split(cmd)
 
         if not external and cmdline[0] == 'hashedassets':
-            return main(cmdline[1:])
+            _stderr = sys.stderr
+            sys.stderr = sys.stdout
+            try:
+                return main(cmdline[1:])
+            finally:
+                sys.stderr = _stderr
 
         if env != None:
             env.update(os.environ)
