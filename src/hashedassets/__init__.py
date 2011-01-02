@@ -113,8 +113,8 @@ class AssetHasher(object):
 
         try:
             if samefile(infile, outfile):
-               logger.debug("Won't copy '%s' to itself.", filename)
-               return
+                logger.debug("Won't copy '%s' to itself.", filename)
+                return
         except OSError, e:
             if not (e.strerror == 'No such file or directory' and e.filename == outfile):
                 assert False,  (dir(e), e.message, e.errno, e.strerror, e.filename)
