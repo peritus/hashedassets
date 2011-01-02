@@ -79,6 +79,8 @@ class AssetHasher(object):
 
         if not reference:
             self.refdir = self.output_dir
+        elif not isdir(reference):
+            self.refdir = dirname(reference)
         else:
             self.refdir = reference
 

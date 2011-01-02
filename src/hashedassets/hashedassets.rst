@@ -295,9 +295,9 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 Relative paths with --reference
 +++++++++++++++++++++++++++++++
 
-If you need all paths relative to a specific dir, ``--reference`` is your friend:
+If you need all paths relative to a specific file or directory, ``--reference`` is your friend:
 
->>> system("hashedassets -v --keep-dirs --reference=output/subdir/ maps/refmap.txt input/ output/")
+>>> system("hashedassets -v --keep-dirs --reference=output/subdir/style.css maps/refmap.txt input/ output/")
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 mkdir -p output/subdir
 cp 'input/subdir/bar.txt' 'output/subdir/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
@@ -312,7 +312,6 @@ bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 If we execute this again, there is no work to do:
 
 >>> system("hashedassets -v --keep-dirs --reference=output/subdir/ maps/refmap.txt input/ output/")
-
 >>> system("rm -r output/subdir/")
 
 Advanced usage
