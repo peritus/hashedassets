@@ -190,9 +190,15 @@ class AssetHasher(object):
 
         serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
 
-        f = open(self.map_filename, "w")
-        f.write(serialized)
-        f.close()
+        if self.map_filename == '-':
+            outfile = sys.stdout
+        else:
+            outfile = open(self.map_filename, 'w')
+
+        outfile.write(serialized)
+
+        if self.map_filename != '-':
+            outfile.close()
 
     def run(self):
         self.read_map()

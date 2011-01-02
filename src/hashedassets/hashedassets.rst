@@ -317,6 +317,15 @@ If we execute this again, there is no work to do:
 Advanced usage
 --------------
 
+Writing the map to stdout
++++++++++++++++++++++++++
+
+>>> system("hashedassets --map-type=txt - input/*.txt input/*/*.txt output/")
+foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
+subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
+<BLANKLINE>
+
+
 Re-using a map
 ++++++++++++++
 
