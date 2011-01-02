@@ -123,7 +123,8 @@ class Rewriter(object):
         '''
         return urlsafe_b64encode(data).strip("=")
 
-    def content(self, filename):
+    @staticmethod
+    def content(filename):
         return open(filename).read()
 
     '''
