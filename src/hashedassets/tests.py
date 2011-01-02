@@ -55,6 +55,8 @@ def test_suite():
         doctest.DocTestSuite('hashedassets'),
         doctest.DocTestSuite('hashedassets.rewrite'),
         doctest.DocTestSuite('hashedassets.serializer'),
+
         doctest.DocFileSuite('hashedassets.rst', **opts),
         doctest.DocFileSuite('errors.rst', **opts),
+        doctest.DocFileSuite('regressions.rst', **opts),
     ])
