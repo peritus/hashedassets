@@ -4,19 +4,16 @@
 Creating some source files
 --------------------------
 
-For this demo, we'll create a few files that will be used throughout the whole
-process:
+For this demo, we'll create a few directories, one for the maps to live, one
+for the input files:
 
 >>> system("mkdir maps/")
-
->>> system("mkdir input/")
->>> write("input/foo.txt", "foo")
+>>> system("mkdir -p input/subdir/2nd/")
 
 We also create files that live in a sub- and subsubdirectories:
 
->>> system("mkdir input/subdir/")
+>>> write("input/foo.txt", "foo")
 >>> write("input/subdir/bar.txt", "bar")
->>> system("mkdir input/subdir/2nd/")
 >>> write("input/subdir/2nd/baz.txt", "foofoofoo")
 
 Simple usage
