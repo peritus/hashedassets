@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from os.path import abspath, dirname, join, splitext
+from os.path import abspath, dirname, join, splitext, split as path_split
 
 try:
     from hashlib import sha1, md5  # Python 2.5
