@@ -41,17 +41,19 @@ logger = logging.getLogger("hashedassets")
 
 class AssetHasher(object):
     def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, refdir=None):
-        self.basedir = dirname(commonprefix(files))
-
-        logger.debug('Input dir is "%s"', self.basedir)
-
-        self.output_dir = output_dir
-
-        logger.debug('Output dir is "%s"', self.output_dir)
-
         logger.debug('Incoming files: %s', files)
 
-        relative_files = map(lambda l: relpath(l, self.basedir),
+        basedir = commonprefix(files)
+        logger.debug('Prefix is "%s"', basedir)
+
+        self.basedir = dirname(basedir)
+
+        logger.debug('Basedir is "%s"', self.basedir)
+
+        self.output_dir = output_dir
+        logger.debug('Output dir is "%s"', self.output_dir)
+
+        relative_files = map(lambda path: relpath(path, self.basedir),
                              chain.from_iterable(map(glob, files)))
 
         logger.debug('Relative files: %s', relative_files)
