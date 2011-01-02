@@ -11,7 +11,7 @@ except ImportError:
 from base64 import urlsafe_b64encode
 
 
-class Rewriter(dict):
+class Rewriter(object):
 
     def __init__(self, relpath, basedir=None):
 
