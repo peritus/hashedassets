@@ -36,7 +36,8 @@ Options:
   -o, --map-only        Don't move files, only generate a map
   -s, --strip-extensions
                         Strip the file extensions from the hashed files
-  --refdir=REFDIR       Paths in map will be relative to this directory
+  --reference=REFERENCE
+                        Paths in map will be relative to this directory
 
 Generating maps with unguessable and unspecified types throw errors:
 

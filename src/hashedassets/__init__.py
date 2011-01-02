@@ -40,7 +40,7 @@ logger = logging.getLogger("hashedassets")
 
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, refdir=None):
+    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, reference=None):
         logger.debug('Incoming files: %s', files)
 
         basedir = commonprefix(files)
@@ -77,7 +77,10 @@ class AssetHasher(object):
         self.map_type = map_type
         self.map_only = map_only
 
-        self.refdir = refdir or self.output_dir
+        if not reference:
+            self.refdir = self.output_dir
+        else:
+            self.refdir = reference
 
         self.rewritestring = rewritestring
 
@@ -295,8 +298,8 @@ def main(args=None):
     )
 
     parser.add_option(
-      "--refdir",
-      dest="refdir",
+      "--reference",
+      dest="reference",
       default=None,
       type="string",
       help="Paths in map will be relative to this directory",
@@ -360,7 +363,7 @@ def main(args=None):
       map_type=options.map_type,
       map_only=options.map_only,
       rewritestring=rewritestring,
-      refdir=options.refdir,
+      reference=options.reference,
     ).run()
 
 if __name__ == '__main__':
