@@ -64,7 +64,7 @@ class Rewriter(object):
         return str(item)
 
     @classmethod
-    def compute_rewritestring(self, strip_extensions=False, digestlength=None, keep_dirs=False, hashfun='sha1'):
+    def compute_rewritestring(cls, strip_extensions=False, digestlength=None, keep_dirs=False, hashfun='sha1'):
         '''
         >>> Rewriter.compute_rewritestring()
         '%(abspath|content|sha1|base64)s%(suffix)s'
