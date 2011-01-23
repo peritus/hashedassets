@@ -45,7 +45,7 @@ class Rewriter(object):
 
             item = getattr(self, tail, False)
 
-            if callable(item):
+            if hasattr(item, '__call__'):
                 return item(self[head])
 
             if str(tail).isdigit():
@@ -58,7 +58,7 @@ class Rewriter(object):
 
         item = getattr(self, key, False)
 
-        if callable(item):
+        if hasattr(item, '__call__'):
             return item()
 
         return str(item)
