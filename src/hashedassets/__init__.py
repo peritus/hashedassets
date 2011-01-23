@@ -168,7 +168,7 @@ class AssetHasher(object):
 
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
-        for filename, hashed_filename in deserialized.items():
+        for filename, hashed_filename in list(deserialized.items()):
             hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
             filename = relpath(join(self.refdir, filename), self.output_dir)
             self.files[filename] = hashed_filename
@@ -181,7 +181,7 @@ class AssetHasher(object):
 
         newmap = OrderedDict()
 
-        for origin, target in self.files.items():
+        for origin, target in list(self.files.items()):
             if target != None:
                 origin = relpath(join(self.output_dir, origin), self.refdir)
                 target = relpath(join(self.output_dir, target), self.refdir)
