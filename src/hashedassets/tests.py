@@ -76,3 +76,8 @@ def test_suite():
     setUp()
 
     return suite
+
+if __name__ == '__main__':
+    import os, sys
+    sys.path.insert(0, dirname(dirname(abspath(__file__))))
+    sys.exit(unittest.TextTestRunner().run(test_suite()))
