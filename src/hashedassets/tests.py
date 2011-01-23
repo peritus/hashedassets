@@ -4,6 +4,8 @@ from shutil import rmtree
 import doctest
 import unittest
 
+EXECUTABLE = join(dirname(abspath(__file__)), '__init__.py')
+
 def setUp():
     try:
         mkdir('./__hashedassets_tests')
@@ -36,8 +38,16 @@ def test_globs():
             finally:
                 sys.stderr = _stderr
 
-        if env != None:
+        if cmdline[0] == 'hashedassets':
+            cmdline[0:1] = [sys.executable, EXECUTABLE]
+
+        if env == None:
+            env = os.environ
+        else:
             env.update(os.environ)
+
+        env['PYTHONPATH'] = ':'.join(sys.path)
+
         process = Popen(cmdline, stderr=STDOUT, stdout=PIPE, env=env)
         # from http://stackoverflow.com/questions/1388753/how-to-get-output-from-subprocess-popen
         while True:
