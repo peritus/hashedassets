@@ -42,11 +42,10 @@ def test_globs():
         # from http://stackoverflow.com/questions/1388753/how-to-get-output-from-subprocess-popen
         while True:
             out = process.stdout.read(1)
-            if out == '' and process.poll() != None:
+            if out == b'' and process.poll() != None:
                 break
-            if out != '':
-                sys.stdout.write(out)
-                sys.stdout.flush()
+            if out != b'':
+                sys.stdout.write(out.decode())
 
     def write(filename, content):  # pylint: disable=W0612
         f = open(filename, "w")
