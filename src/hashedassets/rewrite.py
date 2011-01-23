@@ -8,7 +8,17 @@ except ImportError:
     from sha import sha as sha1    # Python 2.4
     from md5 import md5
 
-from base64 import urlsafe_b64encode
+from base64 import urlsafe_b64encode as _urlsafe_b64encode
+from sys import version_info
+
+if version_info[0] == 3:
+    def urlsafe_b64encode(data):
+        if isinstance(data, str):
+            data = data.encode()
+
+        return _urlsafe_b64encode(data).decode()
+else:
+    urlsafe_b64encode = _urlsafe_b64encode
 
 
 class Rewriter(object):
@@ -94,10 +104,14 @@ class Rewriter(object):
 
     @staticmethod
     def md5(data):
+        if isinstance(data, str):
+            data = data.encode()
         return md5(data).digest()
 
     @staticmethod
     def sha1(data):
+        if isinstance(data, str):
+            data = data.encode()
         return sha1(data).digest()
 
     hash = sha1
