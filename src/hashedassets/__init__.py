@@ -208,7 +208,8 @@ def main(args=None):
     if args == None:
         args = sys.argv[1:]
 
-    version = open(join(dirname(__file__), 'RELEASE-VERSION')).read().strip()
+    version = open(join(dirname(__file__), 'RELEASE-VERSION')).read().strip() + \
+              ' (Python %d.%d.%d)' % sys.version_info[0:3]
 
     parser = OptionParser(
       usage="%prog [ options ] MAPFILE SOURCE [...] DEST",
