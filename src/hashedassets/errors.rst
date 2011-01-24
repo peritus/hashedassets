@@ -14,7 +14,7 @@ If the user specifies the --help option, detailed usage information is shown:
 >>> system("hashedassets --help", external=True)
 Usage: ... [ options ] MAPFILE SOURCE [...] DEST
 <BLANKLINE>
-Version: ... (Python ...)
+Version: v... (Python ...)
 <BLANKLINE>
 Options:
   --version             show program's version number and exit
