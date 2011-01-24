@@ -27,7 +27,7 @@ cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 >>> system("ls maps/")
 map.txt
 
->>> print open("maps/map.txt").read()
+>>> print(open("maps/map.txt").read())
 foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 subdir/bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 <BLANKLINE>
@@ -68,7 +68,7 @@ This generates a sed script that does the replacements for us:
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("maps/map.sed").read()
+>>> print(open("maps/map.sed").read())
 s/foo\.txt/C-7Hteo_D9vJXQ3UfzxbwnXaijM\.txt/g
 s/subdir\/bar\.txt/Ys23Ag_5IOWqZCw9QGaVDdHwH00\.txt/g
 <BLANKLINE>
@@ -95,7 +95,7 @@ JavaScript
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("maps/map.js").read()
+>>> print(open("maps/map.js").read())
 var my_callback = {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -108,7 +108,7 @@ JSON
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("maps/map.json").read()
+>>> print(open("maps/map.json").read())
 {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -121,7 +121,7 @@ JSONP
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("maps/map.jsonp").read()
+>>> print(open("maps/map.jsonp").read())
 my_callback({
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -136,7 +136,7 @@ SCSS
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("maps/map.scss").read()
+>>> print(open("maps/map.scss").read())
 @mixin my_callback($directive, $path) {
          @if $path == "foo.txt" { #{$directive}: url("C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt"); }
     @else if $path == "subdir/bar.txt" { #{$directive}: url("Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"); }
@@ -153,7 +153,7 @@ PHP
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open("maps/map.php").read()
+>>> print(open("maps/map.php").read())
 $my_callback = array(
   "foo.txt" => "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt" => "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt",
@@ -219,7 +219,7 @@ path ('''http://static.example.com/aYs23A/subdir/bar.txt''') that is dropped by
 the webserver during url rewriting.
 
 >>> system("hashedassets -v --map-only maps/maponly.txt input/*.txt")
->>> print open('maps/maponly.txt').read()
+>>> print(open('maps/maponly.txt').read())
 foo.txt: C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 <BLANKLINE>
 
@@ -237,7 +237,7 @@ cp 'input/foo.txt' 'output/foo.txt'
 mkdir -p output/subdir
 cp 'input/subdir/bar.txt' 'output/subdir/bar.txt'
 
->>> print open('maps/identitymap.json').read()
+>>> print(open('maps/identitymap.json').read())
 {
   "foo.txt": "foo.txt",
   "subdir/bar.txt": "subdir/bar.txt"
@@ -251,7 +251,7 @@ cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 rm 'output/subdir/bar.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
->>> print open('maps/identitymap.json').read()
+>>> print(open('maps/identitymap.json').read())
 {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt"
@@ -270,7 +270,7 @@ option is for you! This is particularly useful in combination with the
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00'
 
->>> print open('maps/noextensions.json').read()
+>>> print(open('maps/noextensions.json').read())
 {
   "foo.txt": "C-7Hteo_D9vJXQ3UfzxbwnXaijM",
   "subdir/bar.txt": "Ys23Ag_5IOWqZCw9QGaVDdHwH00"
@@ -304,7 +304,7 @@ cp 'input/subdir/bar.txt' 'output/subdir/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 mkdir -p output/subdir/2nd
 cp 'input/subdir/2nd/baz.txt' 'output/subdir/2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt'
 
->>> print open('maps/refmap.txt').read()
+>>> print(open('maps/refmap.txt').read())
 ../foo.txt: ../C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt
 bar.txt: Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt
 2nd/baz.txt: 2nd/NdbmnXyjdY2paFzlDw9aJzCKH9w.txt
@@ -395,7 +395,7 @@ Even after the command is invoked a second time:
 
 Notice, that the mapfile does not contain the self-reference:
 
->>> print open("maps/samedir.json").read()
+>>> print(open("maps/samedir.json").read())
 {
   "foo.txt": "NdbmnXyjdY2paFzlDw9aJzCKH9w.txt"
 }

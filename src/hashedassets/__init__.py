@@ -56,8 +56,7 @@ class AssetHasher(object):
         self.output_dir = output_dir
         logger.debug('Output dir is "%s"', self.output_dir)
 
-        relative_files = map(lambda path: relpath(path, self.basedir),
-                             chain.from_iterable(map(glob, files)))
+        relative_files = [relpath(path, self.basedir) for path in chain.from_iterable(list(map(glob, files)))]
 
         logger.debug('Relative files: %s', relative_files)
 
@@ -92,7 +91,7 @@ class AssetHasher(object):
         try:
             hashed_filename = self.rewritestring % Rewriter(
               filename, self.basedir)
-        except IOError, e:
+        except IOError as e:
             logger.debug("'%s' does not exist, can't be hashed", filename, exc_info=e)
             return
 
@@ -125,7 +124,7 @@ class AssetHasher(object):
             if samefile(infile, outfile):
                 logger.debug("Won't copy '%s' to itself.", filename)
                 return
-        except OSError, e:
+        except OSError as e:
             if not (e.strerror == 'No such file or directory' and e.filename == outfile):
                 assert False,  (dir(e), e.message, e.errno, e.strerror, e.filename)
                 raise
@@ -133,7 +132,7 @@ class AssetHasher(object):
         try:
             if not self.map_only:
                 copy2(infile, outfile)
-        except IOError, e:
+        except IOError as e:
             if e.strerror == 'Is a directory':
                 return # nothing to copy
 
@@ -169,7 +168,7 @@ class AssetHasher(object):
 
         deserialized = SERIALIZERS[self.map_type].deserialize(content)
 
-        for filename, hashed_filename in deserialized.iteritems():
+        for filename, hashed_filename in list(deserialized.items()):
             hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
             filename = relpath(join(self.refdir, filename), self.output_dir)
             self.files[filename] = hashed_filename
@@ -182,7 +181,7 @@ class AssetHasher(object):
 
         newmap = OrderedDict()
 
-        for origin, target in self.files.iteritems():
+        for origin, target in list(self.files.items()):
             if target != None:
                 origin = relpath(join(self.output_dir, origin), self.refdir)
                 target = relpath(join(self.output_dir, target), self.refdir)
@@ -209,7 +208,8 @@ def main(args=None):
     if args == None:
         args = sys.argv[1:]
 
-    version = open(join(dirname(__file__), 'RELEASE-VERSION')).read().strip()
+    version = open(join(dirname(__file__), 'RELEASE-VERSION')).read().strip() + \
+              ' (Python %d.%d.%d)' % sys.version_info[0:3]
 
     parser = OptionParser(
       usage="%prog [ options ] MAPFILE SOURCE [...] DEST",
@@ -238,10 +238,10 @@ def main(args=None):
     parser.add_option(
       "-t",
       "--map-type",
-      choices=SERIALIZERS.keys(),
+      choices=list(SERIALIZERS.keys()),
       dest="map_type",
       help=("type of the map. one of "
-          + ", ".join(SERIALIZERS.keys())
+          + ", ".join(list(SERIALIZERS.keys()))
           + " [default: guessed from MAPFILE]"),
       metavar="MAPTYPE",
       type="choice",
@@ -334,7 +334,7 @@ def main(args=None):
     logger.setLevel(log_level)
 
     if len(args) < 2 and options.map_only:
-        print args
+        print(args)
         parser.error("In --map-only mode, you need to specify at least MAPFILE and SOURCE")
 
     if len(args) < 3 and not options.map_only:
@@ -345,7 +345,7 @@ def main(args=None):
     if not options.map_type and map_filename:
         options.map_type = splitext(map_filename)[1].lstrip(".")
 
-    if not options.map_type in SERIALIZERS.keys():
+    if not options.map_type in list(SERIALIZERS.keys()):
         parser.error("Invalid map type: '%s'" % options.map_type)
 
     if options.map_only:

@@ -5,16 +5,16 @@ If try to use the software with no arguments the user is reminded to specify at
 least the mapfile, the source and the destination directory:
 
 >>> system("hashedassets", external=True)
-Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
+Usage: ... [ options ] MAPFILE SOURCE [...] DEST
 <BLANKLINE>
-hashedassets: error: You need to specify at least MAPFILE, SOURCE and DEST
+...: error: You need to specify at least MAPFILE, SOURCE and DEST
 
 If the user specifies the --help option, detailed usage information is shown:
 
 >>> system("hashedassets --help", external=True)
-Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
+Usage: ... [ options ] MAPFILE SOURCE [...] DEST
 <BLANKLINE>
-Version: ...
+Version: v... (Python ...)
 <BLANKLINE>
 Options:
   --version             show program's version number and exit
@@ -42,11 +42,11 @@ Options:
 Generating maps with unguessable and unspecified types throw errors:
 
 >>> system("hashedassets unguessable doesnot matter", external=True)
-Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
+Usage: ... [ options ] MAPFILE SOURCE [...] DEST
 <BLANKLINE>
-hashedassets: error: Invalid map type: ''
+...: error: Invalid map type: ''
 
 >>> system("hashedassets unguessable.withextension doesnot matter", external=True)
-Usage: hashedassets [ options ] MAPFILE SOURCE [...] DEST
+Usage: ... [ options ] MAPFILE SOURCE [...] DEST
 <BLANKLINE>
-hashedassets: error: Invalid map type: 'withextension'
+...: error: Invalid map type: 'withextension'

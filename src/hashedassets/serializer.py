@@ -10,7 +10,7 @@ class SimpleSerializer(object):
         return "\n".join([
             "%s: %s" % item
             for item
-            in items.iteritems()]) + "\n"
+            in list(items.items())]) + "\n"
 
     @classmethod
     def deserialize(cls, string):
@@ -84,7 +84,7 @@ class PreambleEntryEpiloqueSerializer(object):  # pylint: disable=R0903
             (cls.PREAMBLE % map_name) + "".join([
                 cls.ENTRY % item
                 for item
-                in items.iteritems()]) +
+                in list(items.items())]) +
             cls.EPILOQUE)
 
 
@@ -146,7 +146,7 @@ class SedSerializer(object):
 
     @classmethod
     def _escape_filename(cls, filename, reverse=False):
-        for key, value in cls.REPLACEMENTS.iteritems():
+        for key, value in list(cls.REPLACEMENTS.items()):
             if reverse:
                 key, value = value, key
             filename = filename.replace(key, value)
@@ -158,7 +158,7 @@ class SedSerializer(object):
             (cls.ENTRY % (cls._escape_filename(key),
                 cls._escape_filename(value)))
             for key, value
-            in items.iteritems()]) + '\n'
+            in list(items.items())]) + '\n'
 
     @classmethod
     def deserialize(cls, string):

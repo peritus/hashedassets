@@ -18,7 +18,7 @@ cp 'regression/in/sub/2.txt' 'regression/out/sub/2kuSN7rMzfGcB2DKt67EqDWQELA.txt
 mkdir -p regression/out/sub/subsub
 cp 'regression/in/sub/subsub/3.txt' 'regression/out/sub/subsub/d95o2uzYI7q7tY7bHI4U1xBug7s.txt'
 
->>> print open('maps/reference_regression.txt').read()
+>>> print(open('maps/reference_regression.txt').read())
 ../1.txt: ../NWoZK3kTsExUV00Ywo1G5jlUKKs.txt
 2.txt: 2kuSN7rMzfGcB2DKt67EqDWQELA.txt
 subsub/3.txt: subsub/d95o2uzYI7q7tY7bHI4U1xBug7s.txt
@@ -39,7 +39,7 @@ cp 'regression/in/1.txt' 'regression/out/NWoZK3kTsExUV00Ywo1G5jlUKKs.txt'
 cp 'regression/in/sub/2.txt' 'regression/out/2kuSN7rMzfGcB2DKt67EqDWQELA.txt'
 cp 'regression/in/sub/subsub/3.txt' 'regression/out/d95o2uzYI7q7tY7bHI4U1xBug7s.txt'
 
->>> print open('maps/abspath_regression_expected.txt').read()
+>>> print(open('maps/abspath_regression_expected.txt').read())
 1.txt: NWoZK3kTsExUV00Ywo1G5jlUKKs.txt
 sub/2.txt: 2kuSN7rMzfGcB2DKt67EqDWQELA.txt
 sub/subsub/3.txt: d95o2uzYI7q7tY7bHI4U1xBug7s.txt
@@ -51,7 +51,7 @@ cp '.../regression/in/1.txt' '.../regression/out/NWoZK3kTsExUV00Ywo1G5jlUKKs.txt
 cp '.../regression/in/sub/2.txt' '.../regression/out/2kuSN7rMzfGcB2DKt67EqDWQELA.txt'
 cp '.../regression/in/sub/subsub/3.txt' '.../regression/out/d95o2uzYI7q7tY7bHI4U1xBug7s.txt'
 
->>> print open('maps/abspath_regression.txt').read()
+>>> print(open('maps/abspath_regression.txt').read())
 1.txt: NWoZK3kTsExUV00Ywo1G5jlUKKs.txt
 sub/2.txt: 2kuSN7rMzfGcB2DKt67EqDWQELA.txt
 sub/subsub/3.txt: d95o2uzYI7q7tY7bHI4U1xBug7s.txt
