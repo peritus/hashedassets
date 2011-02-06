@@ -1,25 +1,35 @@
 #!/usr/bin/env python
+# vim: set filencoding=utf-8
 
 from os.path import abspath, dirname, join, splitext, split as path_split
 
-try:
-    from hashlib import sha1, md5  # Python 2.5
-except ImportError:
-    from sha import sha as sha1    # Python 2.4
-    from md5 import md5
+from hashlib import sha1, md5  # Python 2.5
 
-from base64 import urlsafe_b64encode as _urlsafe_b64encode
+from base64 import urlsafe_b64encode as urlsafe_b64encode
 from sys import version_info
+from functools import wraps
 
-if version_info[0] == 3:
+def encodedata(fun):
+    @wraps(fun)
+    def _encodestrings(data):
+        return fun(data)
+    return _encodestrings
+
+if version_info[0] >= 3:
+    def encodedata(fun):
+        @wraps(fun)
+        def _encodestrings(data):
+            if isinstance(data, str):
+                data = data.encode()
+            return fun(data)
+        return _encodestrings
+
+
+    _urlsafe_b64encode = urlsafe_b64encode
+
+    @encodedata
     def urlsafe_b64encode(data):
-        if isinstance(data, str):
-            data = data.encode()
-
         return _urlsafe_b64encode(data).decode()
-else:
-    urlsafe_b64encode = _urlsafe_b64encode
-
 
 class Rewriter(object):
 
@@ -103,15 +113,19 @@ class Rewriter(object):
         return rewritestring
 
     @staticmethod
+    @encodedata
     def md5(data):
-        if isinstance(data, str):
-            data = data.encode()
         return md5(data).digest()
 
     @staticmethod
+    @encodedata
     def sha1(data):
-        if isinstance(data, str):
-            data = data.encode()
+        '''
+        >>> print(repr(Rewriter.sha1('abc')).lstrip('b'))
+        '\\xa9\\x99>6G\\x06\\x81j\\xba>%qxP\\xc2l\\x9c\\xd0\\xd8\\x9d'
+        >>> print(repr(Rewriter.sha1('服部 半蔵')).lstrip('b'))
+        '|\\xa6\\xcd0%\\xef\\x08\\xd1+6iV\\x92\\xbb\\x826W~\\x170'
+        '''
         return sha1(data).digest()
 
     hash = sha1
@@ -139,7 +153,7 @@ class Rewriter(object):
 
     @staticmethod
     def content(filename):
-        return open(filename).read()
+        return open(filename, 'rb').read()
 
     '''
     Naming conventions for path parts:
