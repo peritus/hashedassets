@@ -41,7 +41,7 @@ logger = logging.getLogger("hashedassets")
 
 
 class AssetMap(object):
-    def __init__(self, files, output_dir, map_name, map_type, reference, excludes):
+    def __init__(self, files, output_dir, name, format, reference, excludes):
         logger.debug('Incoming files: %s', files)
 
         basedir = commonprefix(files)
@@ -92,8 +92,8 @@ class AssetMap(object):
 
         logger.debug("Initialized map, is now %s", self.files)
 
-        self.map_name = map_name
-        self.map_type = map_type
+        self.name = name
+        self.format = format
 
         if not reference:
             self.refdir = self.output_dir
@@ -112,7 +112,7 @@ class AssetMap(object):
 
         content = open(filename).read()
 
-        deserialized = SERIALIZERS[self.map_type].deserialize(content)
+        deserialized = SERIALIZERS[self.format].deserialize(content)
 
         for filename, hashed_filename in list(deserialized.items()):
             hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
@@ -133,7 +133,7 @@ class AssetMap(object):
                 target = relpath(join(self.output_dir, target), self.refdir)
                 newmap[origin] = target
 
-        serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
+        serialized = SERIALIZERS[self.format].serialize(newmap, self.name)
 
         if filename == '-':
             outfile = sys.stdout
@@ -264,7 +264,7 @@ def main(args=None):
       "-t",
       "--map-type",
       choices=list(SERIALIZERS.keys()),
-      dest="map_type",
+      dest="map_format",
       help=("type of the map. one of "
           + ", ".join(list(SERIALIZERS.keys()))
           + " [default: guessed from MAPFILE]"),
@@ -377,11 +377,11 @@ def main(args=None):
 
     map_filename = args[0]
 
-    if not options.map_type and map_filename:
-        options.map_type = splitext(map_filename)[1].lstrip(".")
+    if not options.map_format and map_filename:
+        options.map_format = splitext(map_filename)[1].lstrip(".")
 
-    if not options.map_type in list(SERIALIZERS.keys()):
-        parser.error("Invalid map type: '%s'" % options.map_type)
+    if not options.map_format in list(SERIALIZERS.keys()):
+        parser.error("Invalid map type: '%s'" % options.map_format)
 
     if options.map_only:
         files = args[1:]
@@ -401,8 +401,8 @@ def main(args=None):
     assetmap = AssetMap(
       files=files,
       output_dir=output_dir,
-      map_name=options.map_name,
-      map_type=options.map_type,
+      name=options.map_name,
+      format=options.map_format,
       reference=options.reference,
       excludes=options.excludes,
     )
