@@ -56,16 +56,20 @@ class AssetHasher(object):
         self.output_dir = output_dir
         logger.debug('Output dir is "%s"', self.output_dir)
 
-        relative_files = [relpath(path, self.basedir) for path in chain.from_iterable(list(map(glob, files)))]
+        globfiles = list(chain.from_iterable(list(map(glob, files))))
 
-        logger.debug('Relative files: %s', relative_files)
+        logger.debug("Globfiles: %s", globfiles)
 
-        for file_or_dir in relative_files:
-            for walkroot, _, walkfiles in walk(join(self.basedir, file_or_dir)):
+        for file_or_dir in globfiles:
+            for walkroot, _, walkfiles in walk(file_or_dir):
                 for walkfile in walkfiles:
-                    relative_files.append(normpath(join(relpath(walkroot, self.basedir), walkfile)))
+                    globfiles.append(join(walkroot, walkfile))
 
-        logger.debug('Resolved subdir files: %s', relative_files)
+        logger.debug('Resolved globfiles: %s', globfiles)
+
+        relative_files = [ relpath(globfile, self.basedir) for globfile in globfiles]
+
+        logger.debug('Resolved new relative files: %s', relative_files)
 
         self.files = OrderedDict.fromkeys(relative_files)
 
