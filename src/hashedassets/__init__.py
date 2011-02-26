@@ -40,9 +40,8 @@ except ImportError:
 logger = logging.getLogger("hashedassets")
 
 
-class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type,
-            rewritestring, map_only=False, reference=None, excludes=None):
+class AssetMap(object):
+    def __init__(self, files, output_dir, map_name, map_type, reference, excludes):
         logger.debug('Incoming files: %s', files)
 
         basedir = commonprefix(files)
@@ -93,10 +92,8 @@ class AssetHasher(object):
 
         logger.debug("Initialized map, is now %s", self.files)
 
-        self.map_filename = map_filename
         self.map_name = map_name
         self.map_type = map_type
-        self.map_only = map_only
 
         if not reference:
             self.refdir = self.output_dir
@@ -105,32 +102,84 @@ class AssetHasher(object):
         else:
             self.refdir = reference
 
+
+    def read(self, filename):
+        if not filename:
+            return
+
+        if not exists(filename):
+            return
+
+        content = open(filename).read()
+
+        deserialized = SERIALIZERS[self.map_type].deserialize(content)
+
+        for filename, hashed_filename in list(deserialized.items()):
+            hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
+            filename = relpath(join(self.refdir, filename), self.output_dir)
+            self.files[filename] = hashed_filename
+
+        logger.debug("Read map, is now: %s", self.files)
+
+    def write(self, filename):
+        if not filename:
+            return
+
+        newmap = OrderedDict()
+
+        for origin, target in list(self.files.items()):
+            if target != None:
+                origin = relpath(join(self.output_dir, origin), self.refdir)
+                target = relpath(join(self.output_dir, target), self.refdir)
+                newmap[origin] = target
+
+        serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
+
+        if filename == '-':
+            outfile = sys.stdout
+        else:
+            outfile = open(filename, 'w')
+
+        outfile.write(serialized)
+
+        if filename != '-':
+            outfile.close()
+
+
+class AssetHasher(object):
+    def __init__(self, files, output_dir, map_name, map_type,
+            rewritestring, map_only=False, reference=None, excludes=None):
+
+        self.assetmap = AssetMap(files, output_dir, map_name,
+                map_type, reference, excludes)
+
         self.rewritestring = rewritestring
+        self.map_only = map_only
 
     def process_file(self, filename):
         logger.debug("Processing file '%s'", filename)
 
         try:
             hashed_filename = self.rewritestring % Rewriter(
-              filename, self.basedir)
+              filename, self.assetmap.basedir)
         except IOError as e:
             logger.debug("'%s' does not exist, can't be hashed", filename, exc_info=e)
             return
 
         logger.debug("Determined new hashed filename: '%s'", hashed_filename)
 
-        if self.files[filename]:
+        if self.assetmap.files[filename]:
             logger.debug("File has been processed in a previous run (hashed to '%s' then)",
-                    self.files[filename])
+                    self.assetmap.files[filename])
 
-            outfile = join(self.output_dir, self.files[filename])
+            outfile = join(self.assetmap.output_dir, self.assetmap.files[filename])
 
             if exists(outfile):
                 logger.debug("%s still exists", outfile)
 
-                if hashed_filename == self.files[filename]:
+                if hashed_filename == self.assetmap.files[filename]:
                     # skip file
-                    logger.debug("Skipping file '%s' -> '%s'", filename, self.files[filename])
+                    logger.debug("Skipping file '%s' -> '%s'", filename, self.assetmap.files[filename])
                     return
 
                 # remove dangling file
@@ -139,8 +188,8 @@ class AssetHasher(object):
                     logger.info("rm '%s'", outfile)
 
 
-        infile = join(self.basedir, filename).replace('/./', '/')
-        outfile = join(self.output_dir, hashed_filename).replace('/./', '/')
+        infile = join(self.assetmap.basedir, filename).replace('/./', '/')
+        outfile = join(self.assetmap.output_dir, hashed_filename).replace('/./', '/')
 
         try:
             if samefile(infile, outfile):
@@ -164,67 +213,25 @@ class AssetHasher(object):
             # create parent dirs that are needed for the output file
             logger.debug(hashed_filename)
             create_dir, _ = path_split(hashed_filename)
-            logger.info("mkdir -p %s" % join(self.output_dir, create_dir))
-            makedirs(join(self.output_dir, create_dir))
+            logger.info("mkdir -p %s" % join(self.assetmap.output_dir, create_dir))
+            makedirs(join(self.assetmap.output_dir, create_dir))
 
             # try again
             copy2(infile, outfile)
 
-        self.files[filename] = hashed_filename
+        self.assetmap.files[filename] = hashed_filename
 
         if not self.map_only:
             logger.info("cp '%s' '%s'", infile, outfile)
 
     def process_all_files(self):
-        for f in self.files:
+        for f in self.assetmap.files:
             self.process_file(f)
 
-    def read_map(self):
-        if not self.map_filename:
-            return
-
-        if not exists(self.map_filename):
-            return
-
-        content = open(self.map_filename).read()
-
-        deserialized = SERIALIZERS[self.map_type].deserialize(content)
-
-        for filename, hashed_filename in list(deserialized.items()):
-            hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
-            filename = relpath(join(self.refdir, filename), self.output_dir)
-            self.files[filename] = hashed_filename
-
-        logger.debug("Read map, is now: %s", self.files)
-
-    def write_map(self):
-        if not self.map_filename:
-            return
-
-        newmap = OrderedDict()
-
-        for origin, target in list(self.files.items()):
-            if target != None:
-                origin = relpath(join(self.output_dir, origin), self.refdir)
-                target = relpath(join(self.output_dir, target), self.refdir)
-                newmap[origin] = target
-
-        serialized = SERIALIZERS[self.map_type].serialize(newmap, self.map_name)
-
-        if self.map_filename == '-':
-            outfile = sys.stdout
-        else:
-            outfile = open(self.map_filename, 'w')
-
-        outfile.write(serialized)
-
-        if self.map_filename != '-':
-            outfile.close()
-
-    def run(self):
-        self.read_map()
+    def run(self, filename):
+        self.assetmap.read(filename)
         self.process_all_files()
-        self.write_map()
+        self.assetmap.write(filename)
 
 def main(args=None):
     if args == None:
@@ -398,14 +405,13 @@ def main(args=None):
     AssetHasher(
       files=files,
       output_dir=output_dir,
-      map_filename=map_filename,
       map_name=options.map_name,
       map_type=options.map_type,
       map_only=options.map_only,
       rewritestring=rewritestring,
       reference=options.reference,
       excludes=options.excludes,
-    ).run()
+    ).run(map_filename)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
