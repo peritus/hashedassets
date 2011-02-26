@@ -88,9 +88,10 @@ class AssetMap(object):
         ]
 
         logger.debug('Resolved relative files: %s', relative_files)
-        self.files = OrderedDict.fromkeys(relative_files)
 
-        logger.debug("Initialized map, is now %s", self.files)
+        self._files = OrderedDict.fromkeys(relative_files)
+
+        logger.debug("Initialized map, is now %s", self._files)
 
         self.name = name
         self.format = format
@@ -102,6 +103,18 @@ class AssetMap(object):
         else:
             self.refdir = reference
 
+    def __setitem__(self, name, item):
+        self._files[name] = item
+
+    def __getitem__(self, item):
+        return self._files[item]
+
+    def __iter__(self):
+        for file in self._files:
+            yield file
+
+    def items(self):
+        return self._files.items()
 
     def read(self, filename):
         if not filename:
@@ -117,9 +130,9 @@ class AssetMap(object):
         for filename, hashed_filename in list(deserialized.items()):
             hashed_filename = relpath(join(self.refdir, hashed_filename), self.output_dir)
             filename = relpath(join(self.refdir, filename), self.output_dir)
-            self.files[filename] = hashed_filename
+            self[filename] = hashed_filename
 
-        logger.debug("Read map, is now: %s", self.files)
+        logger.debug("Read map, is now: %s", self._files)
 
     def write(self, filename):
         if not filename:
@@ -127,7 +140,7 @@ class AssetMap(object):
 
         newmap = OrderedDict()
 
-        for origin, target in list(self.files.items()):
+        for origin, target in self.items():
             if target != None:
                 origin = relpath(join(self.output_dir, origin), self.refdir)
                 target = relpath(join(self.output_dir, target), self.refdir)
@@ -164,18 +177,18 @@ class AssetHasher(object):
 
         logger.debug("Determined new hashed filename: '%s'", hashed_filename)
 
-        if self.assetmap.files[filename]:
+        if self.assetmap[filename]:
             logger.debug("File has been processed in a previous run (hashed to '%s' then)",
-                    self.assetmap.files[filename])
+                    self.assetmap[filename])
 
-            outfile = join(self.assetmap.output_dir, self.assetmap.files[filename])
+            outfile = join(self.assetmap.output_dir, self.assetmap[filename])
 
             if exists(outfile):
                 logger.debug("%s still exists", outfile)
 
-                if hashed_filename == self.assetmap.files[filename]:
+                if hashed_filename == self.assetmap[filename]:
                     # skip file
-                    logger.debug("Skipping file '%s' -> '%s'", filename, self.assetmap.files[filename])
+                    logger.debug("Skipping file '%s' -> '%s'", filename, self.assetmap[filename])
                     return
 
                 # remove dangling file
@@ -215,13 +228,13 @@ class AssetHasher(object):
             # try again
             copy2(infile, outfile)
 
-        self.assetmap.files[filename] = hashed_filename
+        self.assetmap[filename] = hashed_filename
 
         if not self.map_only:
             logger.info("cp '%s' '%s'", infile, outfile)
 
     def process_all_files(self):
-        for f in self.assetmap.files:
+        for f in self.assetmap:
             self.process_file(f)
 
     def run(self, filename):
