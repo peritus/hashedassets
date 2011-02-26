@@ -147,12 +147,8 @@ class AssetMap(object):
 
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_name, map_type,
-            rewritestring, map_only=False, reference=None, excludes=None):
-
-        self.assetmap = AssetMap(files, output_dir, map_name,
-                map_type, reference, excludes)
-
+    def __init__(self, assetmap, rewritestring, map_only):
+        self.assetmap = assetmap
         self.rewritestring = rewritestring
         self.map_only = map_only
 
@@ -402,16 +398,16 @@ def main(args=None):
     rewritestring = Rewriter.compute_rewritestring(options.strip_extensions,
             options.digestlength, options.keep_dirs, options.hashfun)
 
-    AssetHasher(
+    assetmap = AssetMap(
       files=files,
       output_dir=output_dir,
       map_name=options.map_name,
       map_type=options.map_type,
-      map_only=options.map_only,
-      rewritestring=rewritestring,
       reference=options.reference,
       excludes=options.excludes,
-    ).run(map_filename)
+    )
+
+    AssetHasher(assetmap, rewritestring, options.map_only).run(map_filename)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
