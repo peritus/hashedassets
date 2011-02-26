@@ -67,10 +67,17 @@ class AssetHasher(object):
 
         logger.debug('Resolved globfiles: %s', globfiles)
 
-        relative_files = [ relpath(globfile, self.basedir) for globfile in globfiles]
 
-        logger.debug('Resolved new relative files: %s', relative_files)
+        relative_files = [
+            r for r in [
+                relpath(globfile, self.basedir)
+                for globfile
+                in globfiles
+            ]
+            if r is not '.'
+        ]
 
+        logger.debug('Resolved relative files: %s', relative_files)
         self.files = OrderedDict.fromkeys(relative_files)
 
         logger.debug("Initialized map, is now %s", self.files)
