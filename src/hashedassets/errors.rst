@@ -38,6 +38,8 @@ Options:
                         Strip the file extensions from the hashed files
   --reference=REFERENCE
                         Paths in map will be relative to this directory
+  -x EXCLUDES, --exclude=EXCLUDES
+                        Excludes these files in the input directory
 
 Generating maps with unguessable and unspecified types throw errors:
 

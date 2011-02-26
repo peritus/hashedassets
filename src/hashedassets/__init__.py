@@ -25,6 +25,7 @@ from re import split as re_split
 from shutil import copy2, Error as shutil_Error
 import sys
 from itertools import chain
+import fnmatch
 
 try:
     # Python 2.7
@@ -40,7 +41,8 @@ logger = logging.getLogger("hashedassets")
 
 
 class AssetHasher(object):
-    def __init__(self, files, output_dir, map_filename, map_name, map_type, rewritestring, map_only=False, reference=None):
+    def __init__(self, files, output_dir, map_filename, map_name, map_type,
+            rewritestring, map_only=False, reference=None, excludes=None):
         logger.debug('Incoming files: %s', files)
 
         basedir = commonprefix(files)
@@ -67,6 +69,15 @@ class AssetHasher(object):
 
         logger.debug('Resolved globfiles: %s', globfiles)
 
+        for exclude in (excludes or []):
+
+            if exclude[-1] is not '*':
+                exclude += '*'
+
+            evicts = fnmatch.filter(globfiles, exclude)
+            logger.debug("exclude '%s' evicts => %s", exclude, evicts)
+
+            globfiles = [ globfile for globfile in globfiles if globfile not in evicts ]
 
         relative_files = [
             r for r in [
@@ -324,6 +335,16 @@ def main(args=None):
       help="Paths in map will be relative to this directory",
     )
 
+    parser.add_option(
+      "-x",
+      "--exclude",
+      dest="excludes",
+      default=None,
+      type="string",
+      action="append",
+      help="Excludes these files in the input directory",
+    )
+
     (options, args) = parser.parse_args(args)
 
     if options.identity:
@@ -383,6 +404,7 @@ def main(args=None):
       map_only=options.map_only,
       rewritestring=rewritestring,
       reference=options.reference,
+      excludes=options.excludes,
     ).run()
 
 if __name__ == '__main__':

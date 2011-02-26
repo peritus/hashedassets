@@ -292,6 +292,19 @@ multiple times to see what's going on inside:
 cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
 cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
 
+Exclude files with --exclude
+++++++++++++++++++++++++++++
+
+You can exclude files in the input dirs, using the ``--exclude``
+option, both using patterns and directories:
+
+>>> system("hashedassets -v maps/xmap.txt --exclude input/*/2nd input/ output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+cp 'input/subdir/bar.txt' 'output/Ys23Ag_5IOWqZCw9QGaVDdHwH00.txt'
+
+>>> system("hashedassets -v maps/xmap2.txt --exclude input/subdir/ input/ output/")
+cp 'input/foo.txt' 'output/C-7Hteo_D9vJXQ3UfzxbwnXaijM.txt'
+
 Relative paths with --reference
 +++++++++++++++++++++++++++++++
 
