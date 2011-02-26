@@ -360,8 +360,8 @@ def main(args=None):
         elif not isdir(output_dir):
             parser.error("Output dir at '%s' is not a directory" % output_dir)
 
-
-    rewritestring = Rewriter.compute_rewritestring(options.strip_extensions, options.digestlength, options.keep_dirs, options.hashfun)
+    rewritestring = Rewriter.compute_rewritestring(options.strip_extensions,
+            options.digestlength, options.keep_dirs, options.hashfun)
 
     AssetHasher(
       files=files,
