@@ -174,4 +174,3 @@ class SedSerializer(object):
         return result
 
 SERIALIZERS['sed'] = SedSerializer
-

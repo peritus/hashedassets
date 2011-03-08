@@ -228,4 +228,3 @@ class Rewriter(object):
         'txt'
         '''
         return splitext(self._relpath)[1].lstrip('.')
-
