@@ -5,14 +5,15 @@ import doctest
 import unittest
 
 EXECUTABLE = join(dirname(abspath(__file__)), '__init__.py')
+TESTDIR = join(dirname(abspath(__file__)), '__hashedassets_tests')
 
 def setUp():
     try:
-        mkdir('./__hashedassets_tests')
+        mkdir(TESTDIR)
     except:
         pass
 
-    chdir('./__hashedassets_tests')
+    chdir(TESTDIR)
 
     for afile in listdir('.'):
         if isdir(afile):
