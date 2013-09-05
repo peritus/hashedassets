@@ -7,6 +7,7 @@ import unittest
 EXECUTABLE = join(dirname(abspath(__file__)), '__init__.py')
 TESTDIR = join(dirname(abspath(__file__)), '__hashedassets_tests')
 
+
 def setUp():
     try:
         mkdir(TESTDIR)
@@ -20,6 +21,7 @@ def setUp():
             rmtree(afile)
         else:
             remove(afile)
+
 
 def test_globs():
     import os
@@ -65,12 +67,13 @@ def test_globs():
 
     return locals()
 
+
 def test_suite():
 
     opts = dict(
-      module_relative=False,
-      globs=test_globs(),
-      optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS|doctest.REPORT_UDIFF,
+        module_relative=False,
+        globs=test_globs(),
+        optionflags=doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS | doctest.REPORT_UDIFF,
     )
 
     suite = unittest.TestSuite([
@@ -88,6 +91,7 @@ def test_suite():
     return suite
 
 if __name__ == '__main__':
-    import os, sys
+    import os
+    import sys
     sys.path.insert(0, dirname(dirname(abspath(__file__))))
     sys.exit(unittest.TextTestRunner().run(test_suite()))

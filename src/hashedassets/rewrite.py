@@ -9,6 +9,7 @@ from base64 import urlsafe_b64encode as urlsafe_b64encode
 from sys import version_info
 from functools import wraps
 
+
 def encodedata(fun):
     @wraps(fun)
     def _encodestrings(data):
@@ -24,18 +25,18 @@ if version_info[0] >= 3:
             return fun(data)
         return _encodestrings
 
-
     _urlsafe_b64encode = urlsafe_b64encode
 
     @encodedata
     def urlsafe_b64encode(data):
         return _urlsafe_b64encode(data).decode()
 
+
 class Rewriter(object):
 
     def __init__(self, relpath, basedir=None):
 
-        self._relpath = relpath # path, relative to basedir
+        self._relpath = relpath  # path, relative to basedir
         self._basedir = basedir or '.'
 
     def __repr__(self):
@@ -97,7 +98,7 @@ class Rewriter(object):
         if hashfun == 'identity':
             return '%(relpath)s'
 
-        initial = [ 'abspath', 'content', hashfun, 'base64', ]
+        initial = ['abspath', 'content', hashfun, 'base64', ]
 
         if digestlength:
             initial.append(str(digestlength))

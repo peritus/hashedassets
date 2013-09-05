@@ -6,7 +6,7 @@ from os import walk
 from glob import glob
 from itertools import chain
 from os.path import join, exists, isdir, relpath, \
-                    dirname, commonprefix
+    dirname, commonprefix
 
 from hashedassets.serializer import SERIALIZERS
 import sys
@@ -22,7 +22,9 @@ except ImportError:
     except ImportError:
         pass
 
+
 class AssetMap(object):
+
     def __init__(self, files, output_dir, name, format, reference, excludes):
         logger.debug('Incoming files: %s', files)
 
@@ -58,7 +60,7 @@ class AssetMap(object):
             evicts = fnmatch.filter(globfiles, exclude)
             logger.debug("exclude '%s' evicts => %s", exclude, evicts)
 
-            globfiles = [ globfile for globfile in globfiles if globfile not in evicts ]
+            globfiles = [globfile for globfile in globfiles if globfile not in evicts]
 
         relative_files = [
             r for r in [

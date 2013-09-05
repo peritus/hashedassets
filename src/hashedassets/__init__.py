@@ -20,8 +20,8 @@ from glob import glob
 from optparse import OptionParser
 from os import remove, mkdir, makedirs, listdir, walk
 from os.path import join, exists, isdir, \
-                    splitext, normpath, dirname, commonprefix, \
-                    split as path_split, samefile, abspath
+    splitext, normpath, dirname, commonprefix, \
+    split as path_split, samefile, abspath
 from re import split as re_split
 from shutil import copy2, Error as shutil_Error
 import sys
@@ -31,6 +31,7 @@ logger = logging.getLogger("hashedassets")
 
 
 class AssetHasher(object):
+
     def __init__(self, assetmap, rewritestring, map_only):
         self.assetmap = assetmap
         self.rewritestring = rewritestring
@@ -41,7 +42,7 @@ class AssetHasher(object):
 
         try:
             hashed_filename = self.rewritestring % Rewriter(
-              filename, self.assetmap.basedir)
+                filename, self.assetmap.basedir)
         except IOError as e:
             logger.debug("'%s' does not exist, can't be hashed", filename, exc_info=e)
             return
@@ -50,7 +51,7 @@ class AssetHasher(object):
 
         if self.assetmap[filename]:
             logger.debug("File has been processed in a previous run (hashed to '%s' then)",
-                    self.assetmap[filename])
+                         self.assetmap[filename])
 
             outfile = join(self.assetmap.output_dir, self.assetmap[filename])
 
@@ -66,7 +67,6 @@ class AssetHasher(object):
                 if not self.map_only:
                     remove(outfile)
                     logger.info("rm '%s'", outfile)
-
 
         infile = join(self.assetmap.basedir, filename).replace('/./', '/')
         outfile = join(self.assetmap.output_dir, hashed_filename).replace('/./', '/')
@@ -85,7 +85,7 @@ class AssetHasher(object):
                 copy2(infile, outfile)
         except IOError as e:
             if e.strerror == 'Is a directory':
-                return # nothing to copy
+                return  # nothing to copy
 
             if not e.strerror == 'No such file or directory':
                 raise
@@ -113,123 +113,124 @@ class AssetHasher(object):
         self.process_all_files()
         self.assetmap.write(filename)
 
+
 def main(args=None):
     if args == None:
         args = sys.argv[1:]
 
     version = open(join(dirname(__file__), 'RELEASE-VERSION')).read().strip() + \
-              ' (Python %d.%d.%d)' % sys.version_info[0:3]
+        ' (Python %d.%d.%d)' % sys.version_info[0:3]
 
     parser = OptionParser(
-      usage="%prog [ options ] MAPFILE SOURCE [...] DEST",
-      version="%prog " + version,
-      description='Version: %s' % version,
+        usage="%prog [ options ] MAPFILE SOURCE [...] DEST",
+        version="%prog " + version,
+        description='Version: %s' % version,
     )
 
     parser.add_option(
-      "-v",
-      "--verbose",
-      action="count",
-      dest="verbosity",
-      help="increase verbosity level",
+        "-v",
+        "--verbose",
+        action="count",
+        dest="verbosity",
+        help="increase verbosity level",
     )
 
     parser.add_option(
-      "-n",
-      "--map-name",
-      default="hashedassets",
-      dest="map_name",
-      help="name of the map [default: %default]",
-      metavar="MAPNAME",
-      type="string",
+        "-n",
+        "--map-name",
+        default="hashedassets",
+        dest="map_name",
+        help="name of the map [default: %default]",
+        metavar="MAPNAME",
+        type="string",
     )
 
     parser.add_option(
-      "-t",
-      "--map-type",
-      choices=list(SERIALIZERS.keys()),
-      dest="map_format",
-      help=("type of the map. one of "
-          + ", ".join(list(SERIALIZERS.keys()))
-          + " [default: guessed from MAPFILE]"),
-      metavar="MAPTYPE",
-      type="choice",
+        "-t",
+        "--map-type",
+        choices=list(SERIALIZERS.keys()),
+        dest="map_format",
+        help=("type of the map. one of "
+              + ", ".join(list(SERIALIZERS.keys()))
+              + " [default: guessed from MAPFILE]"),
+        metavar="MAPTYPE",
+        type="choice",
     )
 
     parser.add_option(
-      "-l",
-      "--digest-length",
-      default=27,
-      dest="digestlength",
-      help=("length of the generated filenames "
-            "(without extension) [default: %default]"),
-      metavar="LENGTH",
-      type="int",
+        "-l",
+        "--digest-length",
+        default=27,
+        dest="digestlength",
+        help=("length of the generated filenames "
+              "(without extension) [default: %default]"),
+        metavar="LENGTH",
+        type="int",
     )
 
     parser.add_option(
-      "-d",
-      "--digest",
-      choices=('sha1', 'md5'),
-      default='sha1',
-      dest="hashfun",
-      help="hash function to use. One of sha1, md5 [default: %default]",
-      metavar="HASHFUN",
-      type="choice",
+        "-d",
+        "--digest",
+        choices=('sha1', 'md5'),
+        default='sha1',
+        dest="hashfun",
+        help="hash function to use. One of sha1, md5 [default: %default]",
+        metavar="HASHFUN",
+        type="choice",
     )
 
     parser.add_option(
-      "-k",
-      "--keep-dirs",
-      action="store_true",
-      dest="keep_dirs",
-      default=False,
-      help="Mirror SOURCE dir structure to DEST [default: false]",
+        "-k",
+        "--keep-dirs",
+        action="store_true",
+        dest="keep_dirs",
+        default=False,
+        help="Mirror SOURCE dir structure to DEST [default: false]",
     )
 
     parser.add_option(
-      "-i",
-      "--identity",
-      action="store_true",
-      dest="identity",
-      default=False,
-      help="Don't actually map, keep all file names",
+        "-i",
+        "--identity",
+        action="store_true",
+        dest="identity",
+        default=False,
+        help="Don't actually map, keep all file names",
     )
 
     parser.add_option(
-      "-o",
-      "--map-only",
-      action="store_true",
-      dest="map_only",
-      default=False,
-      help="Don't move files, only generate a map",
+        "-o",
+        "--map-only",
+        action="store_true",
+        dest="map_only",
+        default=False,
+        help="Don't move files, only generate a map",
     )
 
     parser.add_option(
-      "-s",
-      "--strip-extensions",
-      action="store_true",
-      dest="strip_extensions",
-      default=False,
-      help="Strip the file extensions from the hashed files",
+        "-s",
+        "--strip-extensions",
+        action="store_true",
+        dest="strip_extensions",
+        default=False,
+        help="Strip the file extensions from the hashed files",
     )
 
     parser.add_option(
-      "--reference",
-      dest="reference",
-      default=None,
-      type="string",
-      help="Paths in map will be relative to this directory",
+        "--reference",
+        dest="reference",
+        default=None,
+        type="string",
+        help="Paths in map will be relative to this directory",
     )
 
     parser.add_option(
-      "-x",
-      "--exclude",
-      dest="excludes",
-      default=None,
-      type="string",
-      action="append",
-      help="Excludes these files in the input directory",
+        "-x",
+        "--exclude",
+        dest="excludes",
+        default=None,
+        type="string",
+        action="append",
+        help="Excludes these files in the input directory",
     )
 
     (options, args) = parser.parse_args(args)
@@ -280,15 +281,15 @@ def main(args=None):
             parser.error("Output dir at '%s' is not a directory" % output_dir)
 
     rewritestring = Rewriter.compute_rewritestring(options.strip_extensions,
-            options.digestlength, options.keep_dirs, options.hashfun)
+                                                   options.digestlength, options.keep_dirs, options.hashfun)
 
     assetmap = AssetMap(
-      files=files,
-      output_dir=output_dir,
-      name=options.map_name,
-      format=options.map_format,
-      reference=options.reference,
-      excludes=options.excludes,
+        files=files,
+        output_dir=output_dir,
+        name=options.map_name,
+        format=options.map_format,
+        reference=options.reference,
+        excludes=options.excludes,
     )
 
     AssetHasher(assetmap, rewritestring, options.map_only).run(map_filename)

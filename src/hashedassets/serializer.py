@@ -4,7 +4,9 @@ from re import split as re_split
 
 SERIALIZERS = {}
 
+
 class SimpleSerializer(object):
+
     @classmethod
     def serialize(cls, items, _):
         return "\n".join([
@@ -35,6 +37,7 @@ except ImportError:
 if loads and dumps:
 
     class JSONSerializer(object):
+
         @classmethod
         def serialize(cls, items, _):
             return dumps(items, sort_keys=True, indent=2)
@@ -46,11 +49,12 @@ if loads and dumps:
     SERIALIZERS['json'] = JSONSerializer
 
     class JSONPSerializer(object):
+
         @classmethod
         def serialize(cls, items, map_name):
             return "%(map_name)s(%(dump)s);" % {
-                    'map_name': map_name,
-                    'dump': dumps(items, sort_keys=True, indent=2)}
+                'map_name': map_name,
+                'dump': dumps(items, sort_keys=True, indent=2)}
 
         @classmethod
         def deserialize(cls, string):
@@ -59,6 +63,7 @@ if loads and dumps:
     SERIALIZERS['jsonp'] = JSONPSerializer
 
     class JavaScriptSerializer(object):
+
         @classmethod
         def serialize(cls, items, map_name):
             return (
@@ -90,19 +95,19 @@ class PreambleEntryEpiloqueSerializer(object):  # pylint: disable=R0903
 
 class SassSerializer(PreambleEntryEpiloqueSerializer):
     PREAMBLE = (
-    '@mixin %s($directive, $path) {\n'
-    '         @')
+        '@mixin %s($directive, $path) {\n'
+        '         @')
 
     ENTRY = (
-    'if $path == "%s" { #{$directive}: url("%s"); }\n'
-    '    @else ')
+        'if $path == "%s" { #{$directive}: url("%s"); }\n'
+        '    @else ')
 
     EPILOQUE = (
-    '{\n'
-    '      @warn "Did not find "#{$path}" in list of assets";\n'
-    '      #{$directive}: url($path);\n'
-    '    }\n'
-    '}')
+        '{\n'
+        '      @warn "Did not find "#{$path}" in list of assets";\n'
+        '      #{$directive}: url($path);\n'
+        '    }\n'
+        '}')
 
     @classmethod
     def deserialize(cls, string):
@@ -132,6 +137,7 @@ SERIALIZERS['php'] = PHPSerializer
 
 
 class SedSerializer(object):
+
     '''
     Writes a sed script, use like this:
 
@@ -156,7 +162,7 @@ class SedSerializer(object):
     def serialize(cls, items, _):
         return "\n".join([
             (cls.ENTRY % (cls._escape_filename(key),
-                cls._escape_filename(value)))
+                          cls._escape_filename(value)))
             for key, value
             in list(items.items())]) + '\n'
 
